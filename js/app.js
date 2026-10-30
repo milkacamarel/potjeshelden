@@ -95,7 +95,7 @@
     $$(".screen").forEach(s => (s.hidden = s.id !== `screen-${screen}`));
     document.body.dataset.screen = screen;
     ({ home: renderHome, kind: renderKind, garage: renderGarage, ouder: renderOuder })[screen](opts);
-    window.scrollTo(0, 0);
+    if (!opts.refresh) window.scrollTo(0, 0);
   }
 
   document.addEventListener("click", e => {
@@ -154,7 +154,7 @@
       </div>`;
   }
 
-  function renderKind() {
+  function renderKind({ refresh = false } = {}) {
     const st = S.state.settings;
     $("#screen-kind").innerHTML = `
       <header class="topbar">
@@ -177,7 +177,7 @@
     $$(".action-btn", $("#screen-kind")).forEach(b => b.addEventListener("click", () => kidAction(b.dataset.action, b)));
     // Heeft de ouder sterren gegeven? Dan staat er misschien een verrassing klaar.
     if (newUnlocks().length) setTimeout(checkUnlocks, 500);
-    else speak("welkom", 0.2);
+    else if (!refresh) speak("welkom", 0.2);
   }
 
   function kidAction(id, btn) {
@@ -424,12 +424,12 @@
 
   function tabOverview(root) {
     const today = startOfDay(Date.now());
-    const todayStats = statsFor(S.state.log.filter(e => startOfDay(e.ts) === today));
+    const todayStats = statsFor(S.entries().filter(e => startOfDay(e.ts) === today));
     // Week = maandag t/m zondag
     const monday = new Date(today); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) + weekOffset * 7);
     const days = [...Array(7)].map((_, i) => { const d = new Date(monday); d.setDate(d.getDate() + i); return d.getTime(); });
-    const perDay = days.map(d => ({ d, s: statsFor(S.state.log.filter(e => startOfDay(e.ts) === d)) }));
-    const weekStats = statsFor(S.state.log.filter(e => e.ts >= days[0] && e.ts < days[6] + 864e5));
+    const perDay = days.map(d => ({ d, s: statsFor(S.entries().filter(e => startOfDay(e.ts) === d)) }));
+    const weekStats = statsFor(S.entries().filter(e => e.ts >= days[0] && e.ts < days[6] + 864e5));
     const max = Math.max(5, ...perDay.map(p => p.s.stars));
     const stat = (ico, n, label) => `<div class="stat"><div class="stat-ico">${ico}</div><div class="stat-n">${n}</div><div class="stat-l">${label}</div></div>`;
     const weekLabel = weekOffset === 0 ? "Deze week" : weekOffset === -1 ? "Vorige week" : `${fmtShortDay(days[0])} – ${fmtShortDay(days[6])}`;
@@ -482,7 +482,7 @@
   }
 
   function tabLog(root) {
-    const entries = [...S.state.log].reverse();
+    const entries = [...S.entries()].reverse();
     if (!entries.length) { root.innerHTML = `<div class="card empty">Nog niets geregistreerd. Elk begin is een feestje! 🎈</div>`; return; }
     const groups = [];
     entries.forEach(e => {
@@ -690,6 +690,8 @@
   function tabSettings(root) {
     const st = S.state.settings;
     root.innerHTML = `
+      <div class="card" id="sync-card"></div>
+
       <form class="card form" id="set-form">
         <h2>Kind</h2>
         <label class="field"><span>Naam van je kind <small>(voor de complimentjes)</small></span>
@@ -710,7 +712,7 @@
 
       <div class="card">
         <h2>Gegevens</h2>
-        <p class="hint">Alles wordt alleen op dit apparaat bewaard (in de browser). Maak af en toe een back-up.</p>
+        <p class="hint">${Sync.configured ? "Alles staat op dit apparaat én in je privé opslag op GitHub." : "Alles wordt alleen op dit apparaat bewaard (in de browser). Maak af en toe een back-up, of koppel hierboven je apparaten."}</p>
         <div class="btn-row">
           <button class="btn" id="btn-export">⬇️ Back-up downloaden</button>
           <button class="btn" id="btn-copy">📋 Back-up kopiëren</button>
@@ -719,6 +721,8 @@
         </div>
         <button class="btn btn-danger" id="btn-reset">Alles wissen en opnieuw beginnen</button>
       </div>`;
+
+    renderSyncCard($("#sync-card", root));
 
     $("#set-form", root).addEventListener("submit", e => {
       e.preventDefault();
@@ -784,5 +788,94 @@
   }
 
   // Stemmen laden soms pas later in (Safari/Chrome)
-  Voice.init().finally(() => go("home"));
+  /* ---------- Synchroniseren tussen apparaten ---------- */
+
+  const SYNC_TEXT = {
+    off: "Niet gekoppeld. Alles staat alleen op dit apparaat.",
+    idle: () => Sync.status.lastSync ? `✅ Bijgewerkt om ${fmtTime(Sync.status.lastSync)}` : "✅ Gekoppeld",
+    busy: "🔄 Bezig met bijwerken…",
+    offline: "📴 Geen internet. Wijzigingen worden later vanzelf verstuurd.",
+    error: () => `⚠️ ${Sync.status.error || "Bijwerken lukte niet."}`,
+  };
+  const syncText = () => { const t = SYNC_TEXT[Sync.status.state]; return typeof t === "function" ? t() : t; };
+  Sync.onStatus(() => { const el = $("#sync-status"); if (el) el.textContent = syncText(); });
+
+  function renderSyncCard(card) {
+    if (!Sync.configured) {
+      const pagesOwner = /\.github\.io$/.test(location.hostname) ? location.hostname.split(".")[0] : "";
+      card.innerHTML = `
+        <h2>🔄 Synchroniseren tussen apparaten</h2>
+        <p class="hint">Koppel de app aan een privé opslag in je eigen GitHub-account. Dan zijn sterren, logboek, knoppen en opnames op de MacBook en de iPad hetzelfde. Offline spelen blijft gewoon werken.</p>
+        <ol class="steps">
+          <li><a href="https://github.com/new?name=potjeshelden-data&visibility=private" target="_blank" rel="noopener">Maak een privé repository</a> met de naam <b>potjeshelden-data</b> (staat al ingevuld, klik op <i>Create repository</i>).</li>
+          <li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Maak een sleutel</a>: kies bij <i>Repository access</i> → <i>Only select repositories</i> → potjeshelden-data, en bij <i>Permissions</i> → <i>Contents</i> → <i>Read and write</i>. Klik <i>Generate token</i> en kopieer hem.</li>
+          <li>Vul hieronder je gegevens in en tik op Koppelen.</li>
+        </ol>
+        <form class="form" id="sync-form" autocomplete="off">
+          <label class="field"><span>GitHub-gebruikersnaam</span><input name="owner" required value="${esc(pagesOwner)}" autocapitalize="off" spellcheck="false"></label>
+          <label class="field"><span>Naam van de repository</span><input name="repo" required value="potjeshelden-data" autocapitalize="off" spellcheck="false"></label>
+          <label class="field"><span>Sleutel</span><input name="token" required type="password" placeholder="github_pat_…" autocapitalize="off" spellcheck="false"></label>
+          <button class="btn btn-primary" type="submit">🔗 Koppelen</button>
+          <p class="hint" id="sync-status">${esc(syncText())}</p>
+        </form>`;
+      $("#sync-form", card).addEventListener("submit", async e => {
+        e.preventDefault();
+        const f = e.target;
+        $("#sync-status", card).textContent = "🔄 Bezig met koppelen…";
+        try { await Sync.connect({ owner: f.owner.value, repo: f.repo.value, token: f.token.value }); toast("Gekoppeld ✅"); renderOuder(); }
+        catch (err) { $("#sync-status", card).textContent = `⚠️ ${err.message}`; }
+      });
+      return;
+    }
+    card.innerHTML = `
+      <h2>🔄 Synchroniseren tussen apparaten</h2>
+      <p class="hint">Gekoppeld aan <b>${esc(Sync.conf.owner)}/${esc(Sync.conf.repo)}</b>. Wijzigingen gaan vanzelf naar je andere apparaten.</p>
+      <p class="sync-status" id="sync-status">${esc(syncText())}</p>
+      <div class="btn-row">
+        <button class="btn" id="sync-now">🔄 Nu bijwerken</button>
+        <button class="btn" id="sync-pair">📲 Ander apparaat koppelen</button>
+      </div>
+      <div id="sync-pair-box" hidden>
+        <p class="hint">Open deze link op het andere apparaat (bijvoorbeeld via AirDrop of door hem naar jezelf te sturen). Daarna is dat apparaat meteen gekoppeld. Deel hem alleen met je eigen apparaten, want de sleutel zit erin.</p>
+        <input class="pair-link" id="pair-link" readonly value="${esc(Sync.pairLink())}">
+        <div class="btn-row">
+          <button class="btn" id="pair-copy">📋 Kopieer link</button>
+          ${navigator.share ? `<button class="btn" id="pair-share">📤 Delen</button>` : ""}
+        </div>
+      </div>
+      <button class="btn btn-danger" id="sync-off">Ontkoppelen op dit apparaat</button>`;
+    $("#sync-now", card).addEventListener("click", () => Sync.syncNow());
+    $("#sync-pair", card).addEventListener("click", () => { $("#sync-pair-box", card).hidden = false; });
+    $("#pair-copy", card).addEventListener("click", () => {
+      const inp = $("#pair-link", card);
+      navigator.clipboard.writeText(inp.value).then(() => toast("Link gekopieerd ✅")).catch(() => { inp.select(); toast("Selecteer en kopieer de link."); });
+    });
+    const share = $("#pair-share", card);
+    if (share) share.addEventListener("click", () => navigator.share({ title: "Potjeshelden koppelen", url: Sync.pairLink() }).catch(() => {}));
+    $("#sync-off", card).addEventListener("click", () => {
+      ask("Dit apparaat ontkoppelen? Alles blijft op dit apparaat staan, maar wordt niet meer bijgewerkt.", "Ontkoppelen")
+        .then(ok => { if (ok) { Sync.disconnect(); renderOuder(); } });
+    });
+  }
+
+  // Nieuwe gegevens van een ander apparaat: scherm verversen, maar nooit midden in iets wat iemand aan het doen is.
+  let pendingRefresh = false;
+  function refreshAfterSync() {
+    const overlayOpen = ["#overlay-cheer", "#overlay-unlock", "#overlay-ask"].some(id => !$(id).hidden);
+    const typing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    const parentForm = current === "ouder" && !["overzicht", "logboek"].includes(parentTab);
+    if (overlayOpen || typing || recording || parentForm) { pendingRefresh = true; return; }
+    pendingRefresh = false;
+    go(current, { refresh: true });
+  }
+  window.addEventListener("potjeshelden:synced", refreshAfterSync);
+  document.addEventListener("click", () => { if (pendingRefresh) setTimeout(refreshAfterSync, 400); }, true);
+
+  Voice.init().finally(async () => {
+    go("home");
+    Sync.start();
+    const linked = await Sync.fromLink();
+    if (linked === true) toast("Dit apparaat is gekoppeld ✅");
+    else if (typeof linked === "string") toast(`Koppelen lukte niet: ${linked}`);
+  });
 })();

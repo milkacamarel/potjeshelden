@@ -58,17 +58,33 @@
         const keys = await run("readonly", s => s.getAllKeys());
         for (const k of keys || []) blobs[k] = await run("readonly", s => s.get(k));
       } catch (e) { /* geen opslag beschikbaar */ }
+      // Opnames van vóór het synchroniseren krijgen alsnog een tijdstempel, zodat ze meegaan naar andere apparaten.
+      const meta = Store.state.voiceMeta;
+      Object.keys(blobs).forEach(id => { if (!meta[id]) Store.setVoiceMeta(id, { ts: 1 }); });
     },
 
     has: id => !!blobs[id],
     blob: id => blobs[id],
 
+    /** Nieuwe opname door de ouder: bewaren en markeren om te synchroniseren. */
     async save(id, blob) {
+      await Voice.putLocal(id, blob);
+      Store.setVoiceMeta(id, { ts: Date.now() });
+    },
+
+    /** Opname gewist door de ouder: ook op andere apparaten wissen. */
+    async remove(id) {
+      await Voice.dropLocal(id);
+      Store.setVoiceMeta(id, { ts: Date.now(), deleted: true });
+    },
+
+    /** Alleen op dit apparaat bewaren (gebruikt door sync.js voor opnames van een ander apparaat). */
+    async putLocal(id, blob) {
       blobs[id] = blob; delete buffers[id];
       try { await run("readwrite", s => s.put(blob, id)); } catch (e) { /* alleen deze sessie */ }
     },
 
-    async remove(id) {
+    async dropLocal(id) {
       delete blobs[id]; delete buffers[id];
       try { await run("readwrite", s => s.delete(id)); } catch (e) { /* niets */ }
     },

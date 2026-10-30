@@ -247,6 +247,13 @@ body[data-screen="ouder"] { background: #f6f4ef; -webkit-user-select: auto; user
 .pick input:checked + span { border-color: var(--grass); box-shadow: 0 0 0 3px #a5d6a7; }
 .pick input:focus-visible + span { outline: 3px solid #ffe08a; }
 
+/* ---------- Synchroniseren ---------- */
+.steps { margin: 10px 0; padding-left: 22px; display: grid; gap: 8px; }
+.steps a { color: #0b84bd; font-weight: 700; }
+.sync-status { font-weight: 800; margin: 8px 0; }
+.pair-link { width: 100%; border: 2px solid var(--line); border-radius: 12px; padding: 10px; font-size: .85rem; margin: 8px 0; background: #fffdf8; }
+#sync-pair-box { margin-top: 10px; }
+
 /* ---------- Stem ---------- */
 .voice-count { font-weight: 800; color: #b26a00; margin-top: 8px; }
 .note-box { margin: 10px 0 0; background: #fff6d6; border-radius: 14px; padding: 10px 12px; font-size: .95rem; }

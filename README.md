@@ -68,6 +68,21 @@ Wat nog op slot zit, zie je als silhouet met het aantal sterren dat nodig is.
 
 Je kunt deze in de oudermodus bij **Knoppen** aanpassen.
 
+## MacBook en iPad gelijk houden
+
+Koppel de app één keer aan een **privé** repository in je eigen GitHub-account (Oudermodus → Instellingen → Synchroniseren). Daarna zijn sterren, logboek, knoppen, instellingen en ingesproken zinnen op al je gekoppelde apparaten hetzelfde.
+
+1. Maak een privé repository `potjeshelden-data` (de link in de app vult de naam al in).
+2. Maak een sleutel (fine-grained personal access token) met alleen toegang tot die repository en bij *Contents* de rechten *Read and write*.
+3. Vul op de MacBook je GitHub-naam en de sleutel in en tik op **Koppelen**.
+4. Tik op **Ander apparaat koppelen** en open die link op de iPad (bijv. via AirDrop). Klaar.
+
+Hoe het werkt:
+- De app werkt altijd eerst op het apparaat zelf, dus ook offline. Bij internet wordt elke paar seconden na een wijziging, bij het openen van de app en elke minuut bijgewerkt.
+- Registraties van beide apparaten worden samengevoegd. Bij instellingen en knoppen wint de laatste wijziging, bij opnames de nieuwste opname per zin.
+- Sterren worden nooit minder: ook als twee apparaten tegelijk offline sterren geven, tellen ze allebei mee.
+- De sleutel staat alleen in de browser van je eigen apparaten en mag alleen in `potjeshelden-data` lezen en schrijven.
+
 ## Je eigen stem inspreken
 
 De app gebruikt geen computerstem. In **Oudermodus → 🎙️ Stem** staan 13 zinnen, zoals *"Hoera, een plasje op het potje!"* bij de plasjesknop en *"Er staat iets nieuws in je garage!"* bij een nieuw voertuig. Per zin kun je:
@@ -79,7 +94,7 @@ Een zin zonder opname blijft gewoon stil. Heeft een knop geen eigen zin, dan kie
 
 Goed om te weten:
 - Opnemen met de microfoon kan alleen als de app via `localhost` of `https` draait. Open je de app op de iPad via `http://<ip-adres>:8000`, dan staat de opnameknop niet aan. Gebruik dan **📁 Bestand**.
-- Opnames worden bewaard op het apparaat zelf (in de browser). Ze zitten niet in de back-up, dus spreek ze in op het apparaat waarop je kind speelt.
+- Opnames worden bewaard op het apparaat zelf. Heb je je apparaten gekoppeld, dan gaan ze vanzelf mee naar de andere apparaten. Ze zitten niet in de back-up.
 - Wil je andere zinnen? Pas de lijst `VOICE_LINES` aan in `js/config.js`.
 
 ## Bestandsstructuur
@@ -97,6 +112,7 @@ zindelijkheidsapp/
 │   ├── art.js        Eigen SVG-tekeningen van voertuigen en helden
 │   ├── storage.js    Opslaan en laden in localStorage, back-up, reset
 │   ├── voice.js      Eigen stemopnames: opnemen, bewaren (IndexedDB) en afspelen
+│   ├── sync.js       Apparaten gelijk houden via een privé GitHub-repository
 │   └── app.js        Schermen, navigatie, beloningen, vieringen, oudermodus
 └── README.md
 ```
@@ -126,7 +142,7 @@ Er zijn geen frameworks en geen build-stap. Het is gewone HTML, CSS en JavaScrip
 
 ## Privacy
 
-Alles blijft op het apparaat zelf (localStorage en IndexedDB voor de opnames). Er wordt niets verstuurd. Alleen het lettertype wordt bij een internetverbinding van Google Fonts geladen. Zonder internet valt de app terug op een standaard rond lettertype.
+Alles staat op het apparaat zelf (localStorage en IndexedDB voor de opnames). Alleen als je synchroniseren aanzet, gaan de gegevens naar je eigen privé GitHub-repository, nergens anders heen. Alleen het lettertype wordt bij een internetverbinding van Google Fonts geladen. Zonder internet valt de app terug op een standaard rond lettertype.
 
 ## Idee voor een volgende versie
 
