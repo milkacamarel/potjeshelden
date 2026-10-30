@@ -247,6 +247,23 @@ body[data-screen="ouder"] { background: #f6f4ef; -webkit-user-select: auto; user
 .pick input:checked + span { border-color: var(--grass); box-shadow: 0 0 0 3px #a5d6a7; }
 .pick input:focus-visible + span { outline: 3px solid #ffe08a; }
 
+/* ---------- Rangschikken ---------- */
+.arrange-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 12px; }
+@media (min-width: 640px) { .arrange-grid { grid-template-columns: repeat(3, 1fr); } }
+.arrange-tile {
+  position: relative; border-radius: 20px; padding: 10px 4px; min-height: 92px; touch-action: pan-y;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 35%, white), var(--c));
+  box-shadow: 0 4px 0 color-mix(in srgb, var(--c) 70%, black);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; cursor: grab;
+}
+.at-emoji { font-size: 2.2rem; line-height: 1; }
+.at-label { font-weight: 800; color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,.25); font-size: .95rem; text-align: center; }
+.arranging .arrange-tile:not(.dragging) { animation: jiggle .28s ease-in-out infinite alternate; }
+.arranging .arrange-tile:nth-child(even):not(.dragging) { animation-delay: .14s; }
+.arrange-tile.dragging { z-index: 5; cursor: grabbing; box-shadow: 0 14px 28px rgba(0,0,0,.25); }
+@keyframes jiggle { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
+
 /* ---------- Synchroniseren ---------- */
 .steps { margin: 10px 0; padding-left: 22px; display: grid; gap: 8px; }
 .steps a { color: #0b84bd; font-weight: 700; }

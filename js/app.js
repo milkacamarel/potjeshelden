@@ -13,7 +13,13 @@
   /* ---------- Hulpjes: punten, items, data ---------- */
 
   // Alle knoppen: de vaste uit config.js plus de knoppen die de ouder zelf toevoegde.
-  const allActions = () => [...cfg.ACTIONS, ...(S.state.settings.customActions || [])];
+  // Volgorde: zoals de ouder ze heeft gerangschikt; nieuwe knoppen komen achteraan.
+  const allActions = () => {
+    const list = [...cfg.ACTIONS, ...(S.state.settings.customActions || [])];
+    const order = S.state.settings.actionOrder || [];
+    const rank = (a, i) => { const r = order.indexOf(a.id); return r === -1 ? 1000 + i : r; };
+    return list.map((a, i) => [a, rank(a, i)]).sort((x, y) => x[1] - y[1]).map(x => x[0]);
+  };
   const visibleActions = () => allActions().filter(a => !(S.state.settings.hiddenActions || []).includes(a.id));
   const actionById = id => allActions().find(a => a.id === id);
   // Ingesproken zinnen: vaste lijst plus één zin per eigen knop.
@@ -522,11 +528,100 @@
     { kid: "Broek aan", label: "Zelf broek aantrekken", emoji: "👖", points: 2 },
   ];
 
+  /* Slepen om te rangschikken: even vasthouden (of met de muis meteen slepen), dan verplaatsen. */
+  function setupArrange(grid) {
+    let drag = null, holdTimer = null;
+    const tiles = () => $$(".arrange-tile", grid);
+
+    const place = (x, y) => {
+      const el = drag.el;
+      el.style.transform = "none";
+      const r = el.getBoundingClientRect();
+      el.style.transform = `translate(${x - r.left - drag.dx}px, ${y - r.top - drag.dy}px) scale(1.08)`;
+    };
+
+    const begin = (el, e) => {
+      const r = el.getBoundingClientRect();
+      drag = { el, dx: e.clientX - r.left, dy: e.clientY - r.top };
+      grid.classList.add("arranging");
+      el.classList.add("dragging");
+      if (navigator.vibrate) navigator.vibrate(15);
+      sfx.tap();
+    };
+
+    grid.addEventListener("pointerdown", e => {
+      const el = e.target.closest(".arrange-tile");
+      if (!el) return;
+      const start = { x: e.clientX, y: e.clientY };
+      el.setPointerCapture(e.pointerId);
+      if (e.pointerType === "mouse") begin(el, e);
+      else holdTimer = setTimeout(() => begin(el, e), 300);
+      const move = ev => {
+        if (!drag) {
+          if (Math.hypot(ev.clientX - start.x, ev.clientY - start.y) > 8) { clearTimeout(holdTimer); cleanup(); }
+          return;
+        }
+        place(ev.clientX, ev.clientY);
+        // Welke knop zit er onder je vinger? Dan schuift de gesleepte knop daarheen.
+        const over = tiles().find(t => {
+          if (t === drag.el) return false;
+          const r = t.getBoundingClientRect();
+          return ev.clientX > r.left && ev.clientX < r.right && ev.clientY > r.top && ev.clientY < r.bottom;
+        });
+        if (over) {
+          const list = tiles();
+          grid.insertBefore(drag.el, list.indexOf(over) > list.indexOf(drag.el) ? over.nextSibling : over);
+          place(ev.clientX, ev.clientY);
+        }
+      };
+      const end = () => {
+        clearTimeout(holdTimer);
+        if (drag) {
+          drag.el.style.transform = "";
+          drag.el.classList.remove("dragging");
+          grid.classList.remove("arranging");
+          drag = null;
+          saveOrder();
+        }
+        cleanup();
+      };
+      const cleanup = () => {
+        el.removeEventListener("pointermove", move);
+        el.removeEventListener("pointerup", end);
+        el.removeEventListener("pointercancel", end);
+      };
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerup", end);
+      el.addEventListener("pointercancel", end);
+    });
+    // Tijdens het slepen niet laten scrollen (iPad/iPhone)
+    grid.addEventListener("touchmove", e => { if (drag) e.preventDefault(); }, { passive: false });
+    grid.addEventListener("contextmenu", e => e.preventDefault());
+
+    function saveOrder() {
+      const shown = tiles().map(t => t.dataset.id);
+      const rest = allActions().map(a => a.id).filter(id => !shown.includes(id));
+      S.updateSettings({ actionOrder: [...shown, ...rest] });
+      toast("Volgorde bewaard ✅");
+    }
+  }
+
   function tabButtons(root) {
     const st = S.state.settings;
     const hidden = st.hiddenActions || [];
     const customIds = (st.customActions || []).map(a => a.id);
     root.innerHTML = `
+      <div class="card">
+        <h2>Volgorde op het kinderscherm</h2>
+        <p class="hint">Houd een knop even vast en sleep hem naar een andere plek, net als apps op je iPhone. De nieuwe volgorde wordt meteen bewaard.</p>
+        <div class="arrange-grid" id="arrange-grid">
+          ${visibleActions().map(a => `
+            <div class="arrange-tile" data-id="${a.id}" style="--c:${a.color}">
+              <span class="at-emoji">${a.emoji}</span><span class="at-label">${esc(a.kid)}</span>
+            </div>`).join("")}
+        </div>
+      </div>
+
       <form class="card form" id="btn-form">
         <h2>Knoppen voor ${esc(st.childName || "je kind")}</h2>
         <p class="hint">Pas aan hoeveel sterren een knop geeft, of zet een knop uit. Een uitgezette knop verdwijnt uit de kindermodus, maar alles wat al verdiend is blijft staan.</p>
@@ -562,6 +657,8 @@
           <input type="number" name="points" min="0" max="20" value="2" inputmode="numeric"></label>
         <button class="btn btn-primary" type="submit">➕ Knop toevoegen</button>
       </form>`;
+
+    setupArrange($("#arrange-grid", root));
 
     $("#btn-form", root).addEventListener("submit", e => {
       e.preventDefault();
