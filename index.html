@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffcc33">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Potjeshelden">
+  <title>Potjeshelden</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main id="app">
+    <!-- Home -->
+    <section class="screen" id="screen-home"></section>
+    <!-- Kindermodus -->
+    <section class="screen" id="screen-kind" hidden></section>
+    <!-- Garage / unlock-scherm -->
+    <section class="screen" id="screen-garage" hidden></section>
+    <!-- Oudermodus -->
+    <section class="screen" id="screen-ouder" hidden></section>
+  </main>
+
+  <!-- Overlays -->
+  <div class="overlay" id="overlay-cheer" hidden></div>
+  <div class="overlay" id="overlay-unlock" hidden></div>
+  <div class="overlay" id="overlay-ask" hidden></div>
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/art.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Offline spelen: werkt als de app via een webadres (https of localhost) draait.
+    if ("serviceWorker" in navigator && location.protocol !== "file:") {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+  </script>
+</body>
+</html>
