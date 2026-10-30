@@ -112,7 +112,13 @@
     /** Vervang de hele toestand (na het samenvoegen met een ander apparaat). Start geen nieuwe sync. */
     replace(next) { state = normalize(next); save(false); },
 
-    resetAll() { const voiceMeta = state.voiceMeta; state = freshState(); state.voiceMeta = voiceMeta; state.resetAt = Date.now(); state.settingsUpdatedAt = Date.now(); save(); },
+    /** Sterren, unlocks en logboek opnieuw beginnen. Knoppen, instellingen en opnames blijven bewaard. */
+    resetAll() {
+      const { settings, settingsUpdatedAt, voiceMeta } = state;
+      state = freshState();
+      Object.assign(state, { settings, settingsUpdatedAt, voiceMeta, resetAt: Date.now() });
+      save();
+    },
   };
 
   window.Store = Store;

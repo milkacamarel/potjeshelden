@@ -4,7 +4,7 @@
  * Is er wel internet, dan wordt op de achtergrond de nieuwste versie opgehaald (zichtbaar bij de volgende keer openen).
  * Nieuwe versie uitgebracht? Verhoog VERSION, dan worden oude bestanden opgeruimd.
  */
-const VERSION = "potjeshelden-v4";
+const VERSION = "potjeshelden-v5";
 const FILES = [
   "./", "index.html", "manifest.webmanifest",
   "css/style.css",

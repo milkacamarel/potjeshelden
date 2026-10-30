@@ -719,7 +719,7 @@
           <label class="btn" for="file-import">⬆️ Back-up terugzetten</label>
           <input type="file" id="file-import" accept="application/json,.json" hidden>
         </div>
-        <button class="btn btn-danger" id="btn-reset">Alles wissen en opnieuw beginnen</button>
+        <button class="btn btn-danger" id="btn-reset">Sterren en logboek opnieuw beginnen</button>
       </div>`;
 
     renderSyncCard($("#sync-card", root));
@@ -753,9 +753,9 @@
       catch (err) { toast("Dit bestand kon niet gelezen worden."); }
     });
     $("#btn-reset", root).addEventListener("click", () => {
-      ask("Weet je het zeker? Alle sterren, unlocks en het logboek worden gewist.", "Ja, verder")
-        .then(ok => ok && ask("Echt alles wissen? Dit kan niet ongedaan worden gemaakt.", "Alles wissen"))
-        .then(ok => { if (ok) { S.resetAll(); toast("Alles is gewist. Nieuwe start! 🌱"); renderOuder(); } });
+      ask(`Weet je het zeker? Alle sterren, verzamelde voertuigen en het logboek worden gewist${Sync.configured ? ", ook op je gekoppelde apparaten" : ""}. Knoppen, instellingen en opnames blijven bewaard.`, "Ja, verder")
+        .then(ok => ok && ask("Echt opnieuw beginnen? Dit kan niet ongedaan worden gemaakt.", "Opnieuw beginnen"))
+        .then(ok => { if (ok) { S.resetAll(); toast("Sterren en logboek staan weer op nul. Nieuwe start! 🌱"); renderOuder(); } });
     });
   }
 
