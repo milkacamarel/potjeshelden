@@ -16,6 +16,12 @@
 
   let conf = loadConf();
   let busy = false, again = false, timer = null;
+  let changeSeq = 1, pushedSeq = 0; // lokale wijzigingen tellen; verschil = nog niet op GitHub
+  const isDirty = () => changeSeq !== pushedSeq;
+  let lastRemote = null;     // { data, sha, etag } van de laatste keer ophalen
+  const POLL_MS = 4000;      // zolang de app open staat: elke 4 s kijken (kost bijna niets dankzij ETag)
+  const superseded = new Set(); // versies van data.json waarvan we weten dat ze al vervangen zijn
+  const PUSH_DELAY_MS = 800; // wijzigingen kort bundelen voor ze verstuurd worden
   const status = { state: conf ? "idle" : "off", lastSync: Number(localStorage.getItem(CFG_KEY + "-last")) || 0, error: "" };
   const statusListeners = [];
 
@@ -37,9 +43,11 @@
   const toB64 = bytes => { let bin = ""; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000)); return btoa(bin); };
   const fromB64 = b64 => Uint8Array.from(atob(b64.replace(/\s/g, "")), ch => ch.charCodeAt(0));
 
+  /** Haalt data.json op. Met ETag: als er niets veranderd is, antwoordt GitHub met 304 (telt niet mee voor de limiet). */
   async function getData() {
-    const res = await gh(`contents/${DATA}`);
-    if (res.status === 404) return { data: null, sha: null };
+    const res = await gh(`contents/${DATA}`, lastRemote && lastRemote.etag ? { headers: { "If-None-Match": lastRemote.etag } } : {});
+    if (res.status === 304 && lastRemote) return { ...lastRemote, unchanged: true };
+    if (res.status === 404) return { data: null, sha: null, etag: null };
     if (!res.ok) throw httpError(res);
     const j = await res.json();
     let text;
@@ -49,7 +57,7 @@
       if (!raw.ok) throw httpError(raw);
       text = await raw.text();
     }
-    return { data: JSON.parse(text), sha: j.sha };
+    return { data: JSON.parse(text), sha: j.sha, etag: res.headers.get("ETag") };
   }
 
   async function putFile(path, bytes, sha, message) {
@@ -88,7 +96,7 @@
     const taps = {};
     [local, remote].filter(keep).forEach(side => Object.entries(side.lastKidTap || {}).forEach(([k, v]) => { taps[k] = Math.max(taps[k] || 0, v); }));
 
-    const remoteSettingsNewer = (remote.settingsUpdatedAt || 0) > (local.settingsUpdatedAt || 0);
+    const settings = mergeSettings(local, remote);
 
     return {
       ...local,
@@ -96,11 +104,35 @@
       log: [...byId.values()].sort((a, b) => a.ts - b.ts),
       seenUnlocks: [...seen],
       lastKidTap: taps,
-      settings: remoteSettingsNewer ? remote.settings : local.settings,
+      settings: settings.settings,
+      settingsTs: settings.ts,
       settingsUpdatedAt: Math.max(local.settingsUpdatedAt || 0, remote.settingsUpdatedAt || 0),
       voiceMeta: { ...(local.voiceMeta || {}) }, // wordt per zin bijgewerkt in syncVoice
       resetAt,
     };
+  }
+
+  /** Instellingen per onderdeel samenvoegen: de laatst gewijzigde waarde wint. Eigen knoppen worden per knop samengevoegd. */
+  function mergeSettings(local, remote) {
+    const tsOf = side => side.settingsTs || Object.fromEntries(Object.keys(side.settings || {}).map(k => [k, side.settingsUpdatedAt || 0]));
+    const lt = tsOf(local), rt = tsOf(remote);
+    const ls = local.settings || {}, rs = remote.settings || {};
+    const out = {}, ts = {};
+    new Set([...Object.keys(ls), ...Object.keys(rs)]).forEach(k => {
+      const useRemote = !(k in ls) || ((rt[k] || 0) > (lt[k] || 0) && k in rs);
+      out[k] = useRemote ? rs[k] : ls[k];
+      ts[k] = Math.max(lt[k] || 0, rt[k] || 0);
+    });
+    // Gewiste knoppen: van beide kanten onthouden
+    const deleted = { ...(rs.deletedActions || {}) };
+    Object.entries(ls.deletedActions || {}).forEach(([id, t]) => { deleted[id] = Math.max(deleted[id] || 0, t); });
+    // Eigen knoppen: alles van beide kanten, behalve gewiste; bij dezelfde knop wint de nieuwste lijst
+    const newer = (rt.customActions || 0) > (lt.customActions || 0) ? [rs, ls] : [ls, rs];
+    const byId = new Map();
+    [...(newer[1].customActions || []), ...(newer[0].customActions || [])].forEach(a => byId.set(a.id, a));
+    out.customActions = [...byId.values()].filter(a => !deleted[a.id]);
+    out.deletedActions = deleted;
+    return { settings: out, ts };
   }
 
   const extFor = type => (/mp4|m4a|aac/.test(type) ? "m4a" : /webm/.test(type) ? "webm" : /mpeg|mp3/.test(type) ? "mp3" : /wav/.test(type) ? "wav" : /ogg/.test(type) ? "ogg" : "audio");
@@ -136,8 +168,8 @@
   }
 
   function toRemote(s) {
-    const { log, seenUnlocks, lastKidTap, settings, settingsUpdatedAt, voiceMeta, resetAt } = s;
-    return { app: "potjeshelden", version: 2, log, seenUnlocks, lastKidTap, settings, settingsUpdatedAt, voiceMeta, resetAt };
+    const { log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, resetAt } = s;
+    return { app: "potjeshelden", version: 2, log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, resetAt };
   }
 
   /* ---------- De sync zelf ---------- */
@@ -151,42 +183,61 @@
     if (!conf) return;
     if (busy) { again = true; return; }
     if (!navigator.onLine) { setStatus({ state: "offline" }); return; }
-    busy = true; setStatus({ state: "busy", error: "" });
+    busy = true;
+    let failed = false;
+    const quiet = !isDirty(); // gewone controle: status niet laten knipperen
+    if (!quiet) setStatus({ state: "busy", error: "" });
     try {
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 6; attempt++) {
+        const seq = changeSeq, wasDirty = isDirty();
+        const remote = await getData();
+        // GitHub geeft vlak na een wijziging soms nog even de oude versie terug: dan kort wachten en opnieuw vragen
+        if (remote.sha && superseded.has(remote.sha)) { await new Promise(r => setTimeout(r, 600 + attempt * 400)); continue; }
+        if (remote.unchanged && !wasDirty) break; // niets nieuws, aan beide kanten
         const before = stable(toRemote(Store.state));
-        const { data: remote, sha } = await getData();
-        const merged = merge(Store.state, remote);
-        await syncVoice(merged, Store.state.voiceMeta, remote && remote.voiceMeta);
+        const merged = merge(Store.state, remote.data);
+        await syncVoice(merged, Store.state.voiceMeta, remote.data && remote.data.voiceMeta);
         const out = stable(toRemote(merged));
-        const changedLocally = out !== before;
-        if (changedLocally) {
+        if (out !== before) {
           Store.replace(merged);
           window.dispatchEvent(new CustomEvent("potjeshelden:synced"));
         }
-        if (!remote || out !== stable(toRemote({ ...remote, voiceMeta: remote.voiceMeta || {} }))) {
+        lastRemote = { data: remote.data, sha: remote.sha, etag: remote.etag };
+        if (!remote.data || out !== stable(toRemote({ ...remote.data, voiceMeta: remote.data.voiceMeta || {} }))) {
           try {
-            await putFile(DATA, new TextEncoder().encode(JSON.stringify(toRemote(merged), null, 1)), sha, "Voortgang bijgewerkt");
+            const sha = await putFile(DATA, new TextEncoder().encode(JSON.stringify(toRemote(merged))), remote.sha, "Voortgang bijgewerkt");
+            if (remote.sha) superseded.add(remote.sha);
+            lastRemote = { data: toRemote(merged), sha, etag: null };
           } catch (e) {
-            if (e.status === 409 || e.status === 422) continue; // tegelijk gewijzigd op een ander apparaat: opnieuw samenvoegen
+            if (e.status === 409 || e.status === 422) {
+              if (remote.sha) superseded.add(remote.sha);
+              // Een ander apparaat schreef net tegelijk: even wachten, opnieuw ophalen en samenvoegen
+              lastRemote = null;
+              await new Promise(r => setTimeout(r, 300 + Math.random() * 700 * (attempt + 1)));
+              continue;
+            }
             throw e;
           }
         }
+        pushedSeq = seq;
         break;
       }
       const now = Date.now();
       try { localStorage.setItem(CFG_KEY + "-last", String(now)); } catch (e) { /* niets */ }
-      setStatus({ state: "idle", lastSync: now });
+      setStatus({ state: isDirty() ? "busy" : "idle", lastSync: now, error: "" });
     } catch (e) {
+      failed = true;
       const offline = !navigator.onLine || e instanceof TypeError;
-      setStatus({ state: offline ? "offline" : "error", error: e.status === 401 ? "De sleutel klopt niet (meer)." : e.status === 404 ? "De opslag-repository is niet gevonden." : e.status === 403 ? "De sleutel mag niet schrijven in deze repository." : offline ? "" : e.message });
+      const transient = offline || (e.status >= 500) || e.status === 409 || e.status === 422;
+      setStatus({ state: offline ? "offline" : transient ? "idle" : "error", error: e.status === 401 ? "De sleutel klopt niet (meer)." : e.status === 404 ? "De opslag-repository is niet gevonden." : e.status === 403 ? "De sleutel mag niet schrijven in deze repository (of de limiet is even bereikt)." : transient ? "" : e.message });
+      if (transient && !offline) schedule(2000 + Math.random() * 2000); // tijdelijke storing: zo opnieuw proberen
     } finally {
       busy = false;
-      if (again) { again = false; schedule(500); }
+      if (!failed && (again || isDirty())) { again = false; schedule(PUSH_DELAY_MS); }
     }
   }
 
-  function schedule(ms = 2500) { clearTimeout(timer); timer = setTimeout(syncNow, ms); }
+  function schedule(ms = PUSH_DELAY_MS) { clearTimeout(timer); timer = setTimeout(syncNow, ms); }
 
   /* ---------- Koppelen ---------- */
 
@@ -210,7 +261,7 @@
     async connect(c) {
       c = { owner: c.owner.trim(), repo: (c.repo || "potjeshelden-data").trim(), token: c.token.trim() };
       await test(c);
-      conf = c;
+      conf = c; lastRemote = null; changeSeq++;
       localStorage.setItem(CFG_KEY, JSON.stringify(c));
       setStatus({ state: "idle" });
       await syncNow();
@@ -228,6 +279,18 @@
       return `${location.origin}${location.pathname}#koppel=${encodeURIComponent(payload)}`;
     },
 
+    /** Korte tekst met dezelfde gegevens als de koppellink, om te plakken (handig voor de app op het iPad-beginscherm). */
+    pairCode() { return "PH1-" + btoa(JSON.stringify(conf)); },
+
+    async fromCode(text) {
+      const t = String(text).trim();
+      const m = t.match(/#koppel=(.+)$/);
+      const b64 = m ? decodeURIComponent(m[1]) : t.replace(/^PH1-/, "");
+      let c;
+      try { c = JSON.parse(atob(b64)); } catch (e) { throw new Error("Deze code klopt niet. Kopieer hem opnieuw."); }
+      await Sync.connect(c);
+    },
+
     /** Kijk bij het opstarten of de app via een koppellink geopend is. */
     async fromLink() {
       const m = location.hash.match(/^#koppel=(.+)$/);
@@ -241,10 +304,13 @@
     },
 
     start() {
-      Store.onChange(() => conf && schedule());
+      Store.onChange(() => { changeSeq++; if (conf) schedule(); });
       window.addEventListener("online", () => schedule(300));
-      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") schedule(300); });
-      setInterval(() => { if (conf && document.visibilityState === "visible") syncNow(); }, 60000);
+      window.addEventListener("offline", () => conf && setStatus({ state: "offline" }));
+      // Terug in de app (bijv. iPad uit de slaapstand): meteen bijwerken
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") schedule(100); });
+      window.addEventListener("pageshow", () => schedule(100));
+      setInterval(() => { if (conf && document.visibilityState === "visible" && !busy) syncNow(); }, POLL_MS);
       if (conf) schedule(300);
     },
   };

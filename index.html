@@ -41,7 +41,18 @@
   <script>
     // Offline spelen: werkt als de app via een webadres (https of localhost) draait.
     if ("serviceWorker" in navigator && location.protocol !== "file:") {
-      navigator.serviceWorker.register("sw.js").catch(() => {});
+      const hadController = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.register("sw.js").then(reg => {
+        // Elke keer dat de app weer in beeld komt even kijken of er een nieuwe versie is
+        document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+      }).catch(() => {});
+      // Nieuwe versie geïnstalleerd: herladen zodra het rustig is (op het beginscherm of als de app op de achtergrond staat)
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (!hadController || window.__updateReady) return;
+        window.__updateReady = true;
+        if (document.visibilityState === "hidden" || document.body.dataset.screen === "home") location.reload();
+      });
+      document.addEventListener("visibilitychange", () => { if (window.__updateReady && document.visibilityState === "hidden") location.reload(); });
     }
   </script>
 </body>

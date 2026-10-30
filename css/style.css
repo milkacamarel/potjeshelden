@@ -238,6 +238,7 @@ body[data-screen="ouder"] { background: #f6f4ef; -webkit-user-select: auto; user
 .bi-pts { display: flex; align-items: center; gap: 4px; font-weight: 800; }
 .bi-pts input { width: 60px; text-align: center; border: 2px solid var(--line); border-radius: 12px; padding: 6px; font-size: 1.05rem; background: #fffdf8; }
 .bi-show span { font-size: .9rem; }
+.btn-item .bi-show + .bi-show { flex-basis: 100%; }
 .idea-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .pick-grid { display: flex; flex-wrap: wrap; gap: 6px; }
 .pick { position: relative; }
@@ -270,6 +271,8 @@ body[data-screen="ouder"] { background: #f6f4ef; -webkit-user-select: auto; user
 .sync-status { font-weight: 800; margin: 8px 0; }
 .pair-link { width: 100%; border: 2px solid var(--line); border-radius: 12px; padding: 10px; font-size: .85rem; margin: 8px 0; background: #fffdf8; }
 #sync-pair-box { margin-top: 10px; }
+.pair-code-form { margin-top: 18px; padding-top: 14px; border-top: 2px dashed var(--line); }
+.pair-code-form h3 { margin: 0; }
 
 /* ---------- Stem ---------- */
 .voice-count { font-weight: 800; color: #b26a00; margin-top: 8px; }

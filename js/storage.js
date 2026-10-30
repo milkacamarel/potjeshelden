@@ -22,6 +22,7 @@
       lastKidTap: {},   // actionId -> timestamp (voor de afkoeltijd in Kindermodus)
       settings: { ...cfg.DEFAULT_SETTINGS },
       settingsUpdatedAt: 0,
+      settingsTs: {},   // per instelling: wanneer voor het laatst gewijzigd
       voiceMeta: {},    // zin-id -> { ts, path?, sha?, deleted? } (voor het synchroniseren van opnames)
       resetAt: 0,       // moment van "alles wissen"
     };
@@ -95,7 +96,14 @@
       save();
     },
 
-    updateSettings(patch) { state.settings = { ...state.settings, ...patch }; state.settingsUpdatedAt = Date.now(); save(); },
+    updateSettings(patch) {
+      const now = Date.now();
+      state.settings = { ...state.settings, ...patch };
+      state.settingsTs = { ...(state.settingsTs || {}) };
+      Object.keys(patch).forEach(k => { state.settingsTs[k] = now; });
+      state.settingsUpdatedAt = now;
+      save();
+    },
 
     setVoiceMeta(id, meta) { state.voiceMeta[id] = meta; save(); },
 
@@ -106,6 +114,7 @@
       if (!Array.isArray(s.log)) throw new Error("Geen geldig bestand");
       state = normalize(s);
       state.settingsUpdatedAt = Date.now();
+      state.settingsTs = Object.fromEntries(Object.keys(state.settings).map(k => [k, state.settingsUpdatedAt]));
       save();
     },
 

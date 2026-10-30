@@ -112,5 +112,7 @@ window.APP_CONFIG = {
     kidCooldownMin: 2,     // zelfde knop telt pas weer na X minuten (0 = altijd)
     customActions: [],     // eigen knoppen, toegevoegd in Oudermodus > Knoppen
     hiddenActions: [],     // knoppen die de ouder heeft uitgezet
+    funActions: [],        // plezierknoppen: geen sterren, mogen altijd
+    actionOrder: [],       // volgorde van de knoppen op het kinderscherm
   },
 };

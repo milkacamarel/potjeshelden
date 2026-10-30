@@ -22,6 +22,8 @@
   };
   const visibleActions = () => allActions().filter(a => !(S.state.settings.hiddenActions || []).includes(a.id));
   const actionById = id => allActions().find(a => a.id === id);
+  // Plezierknoppen: geven geen sterren en mogen altijd ingedrukt worden (geen wachttijd, niet in het logboek).
+  const isFun = id => (S.state.settings.funActions || []).includes(id);
   // Ingesproken zinnen: vaste lijst plus één zin per eigen knop.
   const voiceLines = () => [...cfg.VOICE_LINES, ...(S.state.settings.customActions || []).map(a => (
     { id: `act-${a.id}`, group: "knop", when: `Knop ${a.kid}`, say: `Goed gedaan, ${a.kid.toLowerCase()}!` }))];
@@ -97,6 +99,7 @@
 
   let current = "home";
   function go(screen, opts = {}) {
+    if (screen === "home" && window.__updateReady) { location.reload(); return; } // nieuwe versie klaar
     current = screen;
     $$(".screen").forEach(s => (s.hidden = s.id !== `screen-${screen}`));
     document.body.dataset.screen = screen;
@@ -175,7 +178,7 @@
           <button class="action-btn" data-action="${a.id}" style="--c:${a.color}">
             <span class="action-emoji">${a.emoji}</span>
             <span class="action-label">${esc(a.kid)}</span>
-            ${st.kidCanAward ? `<span class="action-pts">+${pointsFor(a.id)} ${STAR}</span>` : ""}
+            ${st.kidCanAward && !isFun(a.id) ? `<span class="action-pts">+${pointsFor(a.id)} ${STAR}</span>` : ""}
           </button>`).join("")}
       </div>
       <button class="btn btn-big btn-garage" data-go="garage"><span class="btn-ico">🚗</span>Naar mijn garage</button>`;
@@ -190,6 +193,13 @@
     const st = S.state.settings;
     const a = actionById(id);
     btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
+
+    if (isFun(id)) {
+      sfx.star();
+      cheer({ points: 0, emoji: a.emoji, text: praise(), party: true });
+      speakForAction(id);
+      return;
+    }
 
     const last = S.state.lastKidTap[id] || 0;
     const cooling = st.kidCooldownMin > 0 && Date.now() - last < st.kidCooldownMin * 60000;
@@ -234,7 +244,7 @@
     }
   }
 
-  function cheer({ points, emoji, text, sub = "" }, after) {
+  function cheer({ points, emoji, text, sub = "", party = false }, after) {
     const ov = $("#overlay-cheer");
     ov.innerHTML = `
       <div class="cheer-card">
@@ -244,7 +254,7 @@
         ${sub ? `<div class="cheer-sub">${esc(sub)}</div>` : ""}
         <button class="btn btn-big btn-ok">👍 Oké!</button>
       </div>`;
-    if (points) confetti(ov);
+    if (points || party) confetti(ov);
     ov.hidden = false;
     const close = () => { ov.hidden = true; ov.innerHTML = ""; clearTimeout(t); if (after) after(); };
     const t = setTimeout(close, points ? 3200 : 2400);
@@ -365,7 +375,7 @@
         <label class="field"><span>Datum en tijd</span><input type="datetime-local" name="ts" value="${toLocalInput(Date.now())}" required></label>
         <div class="field"><span>Wat ging er goed?</span>
           <div class="chips">
-            ${visibleActions().map(a => `
+            ${visibleActions().filter(a => !isFun(a.id)).map(a => `
               <label class="chip"><input type="checkbox" name="act" value="${a.id}">
                 <span>${a.emoji} ${esc(a.label)} <em>+${pointsFor(a.id)}</em></span></label>`).join("")}
           </div>
@@ -624,7 +634,7 @@
 
       <form class="card form" id="btn-form">
         <h2>Knoppen voor ${esc(st.childName || "je kind")}</h2>
-        <p class="hint">Pas aan hoeveel sterren een knop geeft, of zet een knop uit. Een uitgezette knop verdwijnt uit de kindermodus, maar alles wat al verdiend is blijft staan.</p>
+        <p class="hint">Pas aan hoeveel sterren een knop geeft, of zet een knop uit. Een uitgezette knop verdwijnt uit de kindermodus, maar alles wat al verdiend is blijft staan. Met <b>Zonder sterren, mag altijd</b> wordt het een plezierknop: wel feest, geen sterren en geen wachttijd.</p>
         <div class="btn-list">
           ${allActions().map(a => `
             <div class="btn-item ${hidden.includes(a.id) ? "off" : ""}">
@@ -632,6 +642,7 @@
               <span class="bi-text"><b>${esc(a.kid)}</b><small>${esc(a.label)}</small></span>
               <label class="bi-pts"><input type="number" min="0" max="20" name="pt-${a.id}" value="${pointsFor(a.id)}" inputmode="numeric" aria-label="Sterren voor ${esc(a.kid)}">⭐</label>
               <label class="switch bi-show" title="Zichtbaar"><input type="checkbox" name="show-${a.id}" ${hidden.includes(a.id) ? "" : "checked"}><span>Aan</span></label>
+              <label class="switch bi-show" title="Geeft geen sterren en mag altijd ingedrukt worden"><input type="checkbox" name="fun-${a.id}" ${isFun(a.id) ? "checked" : ""}><span>Zonder sterren, mag altijd</span></label>
               ${customIds.includes(a.id) ? `<button type="button" class="log-del" data-delbtn="${a.id}" aria-label="Knop verwijderen">🗑</button>` : ""}
             </div>`).join("")}
         </div>
@@ -655,6 +666,7 @@
         </div>
         <label class="field"><span>Aantal sterren</span>
           <input type="number" name="points" min="0" max="20" value="2" inputmode="numeric"></label>
+        <label class="switch"><input type="checkbox" name="fun"><span>Zonder sterren, mag altijd (plezierknop)</span></label>
         <button class="btn btn-primary" type="submit">➕ Knop toevoegen</button>
       </form>`;
 
@@ -664,14 +676,15 @@
       e.preventDefault();
       const f = e.target;
       const points = { ...(st.points || {}) };
-      const hiddenNew = [];
+      const hiddenNew = [], funNew = [];
       allActions().forEach(a => {
         const v = parseInt(f[`pt-${a.id}`].value, 10);
         points[a.id] = Number.isFinite(v) ? Math.max(0, Math.min(20, v)) : a.points;
         if (!f[`show-${a.id}`].checked) hiddenNew.push(a.id);
+        if (f[`fun-${a.id}`].checked) funNew.push(a.id);
       });
       if (hiddenNew.length === allActions().length) { toast("Laat minstens één knop aan staan 🙂"); return; }
-      S.updateSettings({ points, hiddenActions: hiddenNew });
+      S.updateSettings({ points, hiddenActions: hiddenNew, funActions: funNew });
       toast("Knoppen opgeslagen ✅");
       renderOuder();
     });
@@ -682,6 +695,7 @@
         if (!ok) return;
         S.updateSettings({
           customActions: st.customActions.filter(a => a.id !== id),
+          deletedActions: { ...(st.deletedActions || {}), [id]: Date.now() },
           hiddenActions: (st.hiddenActions || []).filter(x => x !== id),
         });
         Voice.remove(`act-${id}`);
@@ -708,7 +722,7 @@
         emoji: nf.emoji.value, color: nf.color.value,
         points: Number.isFinite(pts) ? Math.max(0, Math.min(20, pts)) : 2,
       };
-      S.updateSettings({ customActions: [...(st.customActions || []), action] });
+      S.updateSettings({ customActions: [...(st.customActions || []), action], ...(nf.fun.checked ? { funActions: [...(st.funActions || []), action.id] } : {}) });
       toast(`Knop "${kid}" toegevoegd ✅ Je kunt er bij 🎙️ Stem een zin voor inspreken.`);
       renderOuder();
     });
@@ -914,7 +928,21 @@
           <label class="field"><span>Sleutel</span><input name="token" required type="password" placeholder="github_pat_…" autocapitalize="off" spellcheck="false"></label>
           <button class="btn btn-primary" type="submit">🔗 Koppelen</button>
           <p class="hint" id="sync-status">${esc(syncText())}</p>
+        </form>
+        <form class="form pair-code-form" id="code-form" autocomplete="off">
+          <h3>Al een ander apparaat gekoppeld?</h3>
+          <p class="hint">Kopieer op dat apparaat de koppelcode (Instellingen → Ander apparaat koppelen) en plak hem hier. Op een iPad of iPhone werkt dit ook in de app op je beginscherm.</p>
+          <label class="field"><span>Koppelcode of koppellink</span><input name="code" required autocapitalize="off" spellcheck="false" placeholder="Plak hier"></label>
+          <button class="btn btn-primary" type="submit">📲 Koppel met code</button>
+          <p class="hint" id="code-status"></p>
         </form>`;
+      $("#code-form", card).addEventListener("submit", async e => {
+        e.preventDefault();
+        const out = $("#code-status", card);
+        out.textContent = "🔄 Bezig met koppelen…";
+        try { await Sync.fromCode(e.target.code.value); toast("Dit apparaat is gekoppeld ✅"); renderOuder(); }
+        catch (err) { out.textContent = `⚠️ ${err.message || "Deze code klopt niet."}`; }
+      });
       $("#sync-form", card).addEventListener("submit", async e => {
         e.preventDefault();
         const f = e.target;
@@ -933,7 +961,12 @@
         <button class="btn" id="sync-pair">📲 Ander apparaat koppelen</button>
       </div>
       <div id="sync-pair-box" hidden>
-        <p class="hint">Open deze link op het andere apparaat (bijvoorbeeld via AirDrop of door hem naar jezelf te sturen). Daarna is dat apparaat meteen gekoppeld. Deel hem alleen met je eigen apparaten, want de sleutel zit erin.</p>
+        <p class="hint"><b>iPad of iPhone met de app op het beginscherm:</b> kopieer de koppelcode, open daar de app → Oudermodus → Instellingen en plak hem bij <i>Koppelcode</i>. (Een link opent in Safari, en dat telt op iPad/iPhone als een aparte app.)</p>
+        <input class="pair-link" id="pair-code" readonly value="${esc(Sync.pairCode())}">
+        <div class="btn-row">
+          <button class="btn" id="code-copy">📋 Kopieer koppelcode</button>
+        </div>
+        <p class="hint">Of open deze link op het andere apparaat, bijvoorbeeld een computer. Deel code en link alleen met je eigen apparaten, want de sleutel zit erin.</p>
         <input class="pair-link" id="pair-link" readonly value="${esc(Sync.pairLink())}">
         <div class="btn-row">
           <button class="btn" id="pair-copy">📋 Kopieer link</button>
@@ -943,6 +976,10 @@
       <button class="btn btn-danger" id="sync-off">Ontkoppelen op dit apparaat</button>`;
     $("#sync-now", card).addEventListener("click", () => Sync.syncNow());
     $("#sync-pair", card).addEventListener("click", () => { $("#sync-pair-box", card).hidden = false; });
+    $("#code-copy", card).addEventListener("click", () => {
+      const inp = $("#pair-code", card);
+      navigator.clipboard.writeText(inp.value).then(() => toast("Koppelcode gekopieerd ✅")).catch(() => { inp.select(); toast("Selecteer en kopieer de code."); });
+    });
     $("#pair-copy", card).addEventListener("click", () => {
       const inp = $("#pair-link", card);
       navigator.clipboard.writeText(inp.value).then(() => toast("Link gekopieerd ✅")).catch(() => { inp.select(); toast("Selecteer en kopieer de link."); });

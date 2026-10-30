@@ -4,7 +4,7 @@
  * Is er wel internet, dan wordt op de achtergrond de nieuwste versie opgehaald (zichtbaar bij de volgende keer openen).
  * Nieuwe versie uitgebracht? Verhoog VERSION, dan worden oude bestanden opgeruimd.
  */
-const VERSION = "potjeshelden-v6";
+const VERSION = "potjeshelden-v8";
 const FILES = [
   "./", "index.html", "manifest.webmanifest",
   "css/style.css",
@@ -13,7 +13,7 @@ const FILES = [
 ];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES.map(f => new Request(f, { cache: "reload" })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", e => {
