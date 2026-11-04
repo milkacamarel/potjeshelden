@@ -33,7 +33,27 @@
   };
   const starsWord = n => (n === 1 ? cfg.currency.single : cfg.currency.name);
 
-  const allItems = () => cfg.WORLDS.flatMap(w => w.items.map(i => ({ ...i, world: w })));
+  /* Echte prijs: elke X sterren (standaard 100) mag het kind een echt speelgoedautootje uitkiezen.
+     In de garage komt er dan een Prijsautootje bij in de Prijzenkast. Die lijst groeit vanzelf mee, dus er is altijd een volgend doel. */
+  const rewardEvery = () => Math.max(10, Number(S.state.settings.rewardEvery) || 100);
+  const rewardName = () => S.state.settings.rewardName || "miniatuurautootje";
+  const PRIZE_COLORS = ["#e53935", "#1e88e5", "#43a047", "#ffb300", "#8e24aa", "#00acc1", "#f4511e", "#3949ab"];
+  function rewardWorld() {
+    const every = rewardEvery();
+    const count = Math.max(3, Math.floor(S.state.totalStars / every) + 2);
+    return {
+      id: "prijzen", name: "Prijzenkast", short: "Prijzen", emoji: "🎁", color: "#ff6f00", bg: "linear-gradient(160deg,#fff3e0,#fce4ec)",
+      items: Array.from({ length: count }, (_, i) => ({
+        id: `p-${(i + 1) * every}`, name: `Prijsautootje ${i + 1}`, type: "prijs", cost: (i + 1) * every, reward: true,
+        art: "raceauto", opts: { c: PRIZE_COLORS[i % PRIZE_COLORS.length], c2: "#ffffff", nr: String(i + 1) },
+      })),
+    };
+  }
+  const worlds = () => [...cfg.WORLDS, rewardWorld()];
+  const earnedRewards = () => rewardWorld().items.filter(i => S.state.totalStars >= i.cost);
+  const pendingRewards = () => earnedRewards().filter(i => !(S.state.rewardsGiven || {})[i.cost]);
+
+  const allItems = () => worlds().flatMap(w => w.items.map(i => ({ ...i, world: w })));
   const isUnlocked = item => S.state.totalStars >= item.cost;
   const nextItem = () => allItems().filter(i => !isUnlocked(i)).sort((a, b) => a.cost - b.cost)[0];
   const prevCost = () => Math.max(0, ...allItems().filter(isUnlocked).map(i => i.cost));
@@ -163,6 +183,23 @@
       </div>`;
   }
 
+  function rewardCard() {
+    const every = rewardEvery(), total = S.state.totalStars;
+    const next = (Math.floor(total / every) + 1) * every, left = next - total;
+    const pct = Math.round(((total % every) / every) * 100);
+    const pending = pendingRewards().length;
+    return `
+      <div class="reward-card">
+        <div class="reward-art">${ART.raceauto({ c: PRIZE_COLORS[Math.floor(total / every) % PRIZE_COLORS.length], nr: String(Math.floor(total / every) + 1) })}<span class="reward-gift">🎁</span></div>
+        <div class="reward-body">
+          <div class="reward-title">Echt ${esc(rewardName())}!</div>
+          <div class="reward-text">Nog <b>${left}</b> ${starsWord(left)}, dan mag je er een uitkiezen!</div>
+          <div class="bar reward-bar"><div class="bar-fill" style="width:${pct}%"></div><span class="bar-goal">${STAR}${next}</span></div>
+        </div>
+      </div>
+      ${pending ? `<div class="reward-ready">🎉 Er ligt ${pending === 1 ? "een echt " + esc(rewardName()) : pending + " echte " + esc(rewardName()) + "s"} voor je klaar! Vraag het aan papa of mama.</div>` : ""}`;
+  }
+
   function renderKind({ refresh = false } = {}) {
     const st = S.state.settings;
     $("#screen-kind").innerHTML = `
@@ -171,7 +208,9 @@
         <div class="star-pill" id="kid-stars">${STAR} <b>${S.state.totalStars}</b></div>
         <button class="btn-round" data-go="garage" aria-label="Naar garage">🏆</button>
       </header>
+      <div id="kid-reward">${rewardCard()}</div>
       <div id="kid-progress">${progressCard()}</div>
+      <button class="btn btn-big btn-film" id="kid-film"><span class="btn-ico">📺</span>Potjesfilmpje</button>
       <h2 class="kid-title">Wat heb je gedaan?</h2>
       <div class="action-grid">
         ${visibleActions().map(a => `
@@ -184,6 +223,7 @@
       <button class="btn btn-big btn-garage" data-go="garage"><span class="btn-ico">🚗</span>Naar mijn garage</button>`;
 
     $$(".action-btn", $("#screen-kind")).forEach(b => b.addEventListener("click", () => kidAction(b.dataset.action, b)));
+    $("#kid-film").addEventListener("click", () => openFilm());
     // Heeft de ouder sterren gegeven? Dan staat er misschien een verrassing klaar.
     if (newUnlocks().length) setTimeout(checkUnlocks, 500);
     else if (!refresh) speak("welkom", 0.2);
@@ -215,7 +255,7 @@
     const pts = pointsFor(id);
     S.addEntry({ actions: [id], points: pts, source: "kind" });
     sfx.star();
-    cheer({ points: pts, emoji: a.emoji, text: praise() }, () => checkUnlocks());
+    cheer({ points: pts, emoji: a.emoji, text: praise(), film: id === "zitten" }, () => checkUnlocks());
     speakForAction(id);
     refreshKidHeader();
   }
@@ -227,6 +267,7 @@
   function refreshKidHeader() {
     const s = $("#kid-stars"); if (s) { s.innerHTML = `${STAR} <b>${S.state.totalStars}</b>`; s.classList.remove("pop"); void s.offsetWidth; s.classList.add("pop"); }
     const p = $("#kid-progress"); if (p) p.innerHTML = progressCard();
+    const r = $("#kid-reward"); if (r) r.innerHTML = rewardCard();
   }
 
   /* ---------- Vieringen ---------- */
@@ -244,7 +285,13 @@
     }
   }
 
-  function cheer({ points, emoji, text, sub = "", party = false }, after) {
+  function openFilm() {
+    sfx.tap();
+    Film.open({ sound: S.state.settings.sound });
+    speak("filmpje", 0.3);
+  }
+
+  function cheer({ points, emoji, text, sub = "", party = false, film = false }, after) {
     const ov = $("#overlay-cheer");
     ov.innerHTML = `
       <div class="cheer-card">
@@ -253,12 +300,13 @@
         ${points ? `<div class="cheer-points">+${points} ${STAR}</div>` : ""}
         ${sub ? `<div class="cheer-sub">${esc(sub)}</div>` : ""}
         <button class="btn btn-big btn-ok">👍 Oké!</button>
+        ${film ? `<button class="btn btn-big btn-film cheer-film">📺 Filmpje kijken</button>` : ""}
       </div>`;
     if (points || party) confetti(ov);
     ov.hidden = false;
     const close = () => { ov.hidden = true; ov.innerHTML = ""; clearTimeout(t); if (after) after(); };
-    const t = setTimeout(close, points ? 3200 : 2400);
-    ov.onclick = close;
+    const t = setTimeout(close, film ? 6000 : points ? 3200 : 2400);
+    ov.onclick = e => { const wantsFilm = !!e.target.closest(".cheer-film"); close(); if (wantsFilm) openFilm(); };
   }
 
   function checkUnlocks() {
@@ -275,7 +323,14 @@
     const item = list[idx];
     const ov = $("#overlay-unlock");
     ov.style.setProperty("--accent", item.world.color);
-    ov.innerHTML = `
+    ov.innerHTML = item.reward ? `
+      <div class="unlock-card reward-unlock">
+        <div class="unlock-ribbon">🎉 ${item.cost} sterren! 🎉</div>
+        <div class="unlock-art shine">${renderArt(item)}<span class="reward-gift big">🎁</span></div>
+        <div class="unlock-name">Je mag een echt ${esc(rewardName())} uitkiezen!</div>
+        <div class="unlock-world">Wat ben jij een kampioen${S.state.settings.childName ? ", " + esc(S.state.settings.childName) : ""}!</div>
+        <button class="btn btn-mega btn-ok">🏆 Hoera!</button>
+      </div>` : `
       <div class="unlock-card">
         <div class="unlock-ribbon">Nieuw in je garage!</div>
         <div class="unlock-art shine">${renderArt(item)}</div>
@@ -283,10 +338,11 @@
         <div class="unlock-world">${item.world.emoji} ${esc(item.world.name)} · ${cfg.TYPE_LABELS[item.type]}</div>
         <button class="btn btn-mega btn-ok">🎉 Joepie!</button>
       </div>`;
-    confetti(ov, 40);
+    confetti(ov, item.reward ? 90 : 40);
     ov.hidden = false;
     sfx.unlock();
-    if (idx === 0) speak("nieuw", 0.9);
+    if (item.reward) { setTimeout(sfx.unlock, 900); speak(["autootje", "nieuw"], 1.2); }
+    else if (idx === 0) speak("nieuw", 0.9);
     S.markSeen([item.id]);
     $(".btn-ok", ov).onclick = () => {
       ov.hidden = true; ov.innerHTML = "";
@@ -301,7 +357,7 @@
   let garageWorld = cfg.WORLDS[0].id;
   function renderGarage({ world } = {}) {
     if (world) garageWorld = world;
-    const w = cfg.WORLDS.find(x => x.id === garageWorld);
+    const w = worlds().find(x => x.id === garageWorld) || worlds()[0];
     const got = w.items.filter(isUnlocked).length;
     const el = $("#screen-garage");
     el.style.setProperty("--world-bg", w.bg);
@@ -313,9 +369,9 @@
         <button class="btn-round" data-go="home" aria-label="Naar home">🏠</button>
       </header>
       <div class="world-tabs" role="tablist">
-        ${cfg.WORLDS.map(x => `
+        ${worlds().map(x => `
           <button class="world-tab ${x.id === w.id ? "active" : ""}" data-world-tab="${x.id}" style="--c:${x.color}" role="tab" aria-selected="${x.id === w.id}">
-            <span class="wt-emoji">${x.emoji}</span><span class="wt-name">${esc(x.name.replace("wereld", ""))}</span>
+            <span class="wt-emoji">${x.emoji}</span><span class="wt-name">${esc(x.short || x.name.replace("wereld", ""))}</span>
           </button>`).join("")}
       </div>
       <div class="world-head">
@@ -451,6 +507,8 @@
     const weekLabel = weekOffset === 0 ? "Deze week" : weekOffset === -1 ? "Vorige week" : `${fmtShortDay(days[0])} – ${fmtShortDay(days[6])}`;
 
     root.innerHTML = `
+      ${prizeCard()}
+
       <div class="card">
         <h2>Vandaag</h2>
         <div class="stats">
@@ -486,6 +544,8 @@
         <p class="hint">Elke stap telt, ook gaan zitten en proberen. Kleine stapjes zijn grote overwinningen. 💛</p>
       </div>
 
+      ${timeOfDayCard()}
+
       <div class="card">
         <h2>Verzameld</h2>
         <div class="stats compact">
@@ -495,6 +555,94 @@
       </div>`;
 
     $$("[data-week]", root).forEach(b => b.addEventListener("click", () => { weekOffset = Math.min(0, weekOffset + Number(b.dataset.week)); renderOuder(); }));
+    $$("[data-tod-range]", root).forEach(b => b.addEventListener("click", () => { todRange = b.dataset.todRange; renderOuder(); }));
+    $$("[data-given]", root).forEach(b => b.addEventListener("change", () => { S.setRewardGiven(Number(b.dataset.given), b.checked); renderOuder(); }));
+    $$(".tod-cell, .tod-bar-col", root).forEach(c => c.addEventListener("click", () => toast(c.dataset.tip)));
+  }
+
+  /* Echte prijzen: welke zijn verdiend en welke heb je al gegeven? */
+  function prizeCard() {
+    const earned = earnedRewards();
+    const given = S.state.rewardsGiven || {};
+    const every = rewardEvery(), total = S.state.totalStars;
+    const next = (Math.floor(total / every) + 1) * every;
+    return `
+      <div class="card prize-card">
+        <h2>🎁 Echte prijzen</h2>
+        <p class="hint">Elke ${every} sterren mag ${esc(S.state.settings.childName || "je kind")} een echt ${esc(rewardName())} uitkiezen. Nog <b>${next - total}</b> ${starsWord(next - total)} tot de volgende (bij ${next}).</p>
+        ${earned.length ? `<div class="prize-list">${earned.slice().reverse().map(i => {
+          const g = given[i.cost] && given[i.cost].given;
+          return `<label class="prize-row ${g ? "done" : ""}">
+            <span class="prize-art">${renderArt(i)}</span>
+            <span class="prize-text"><b>${i.cost} sterren</b><small>${g ? "Gegeven ✅" : "Nog geven 🎁"}</small></span>
+            <span class="switch"><input type="checkbox" data-given="${i.cost}" ${g ? "checked" : ""}><span>Gegeven</span></span>
+          </label>`;
+        }).join("")}</div>` : `<p class="hint">De eerste echte prijs komt bij ${every} sterren.</p>`}
+      </div>`;
+  }
+
+  /* Wanneer lukt het? Plasjes en poepjes per tijdstip van de dag. */
+  let todRange = "week";
+  const TOD_BLOCKS = [[6, 8], [8, 10], [10, 12], [12, 14], [14, 16], [16, 18], [18, 20], [20, 22]];
+  const todBlock = ts => { const h = new Date(ts).getHours(); return TOD_BLOCKS.findIndex(([a, b]) => h >= a && h < b); };
+  const TOD_RAMP = ["#fff1cc", "#ffd97a", "#ffbf3f", "#f39c12", "#c77700"];
+
+  function timeOfDayCard() {
+    const today = startOfDay(Date.now());
+    const monday = new Date(today); monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7) + weekOffset * 7);
+    const weekStart = monday.getTime();
+    const from = todRange === "week" ? weekStart : today - 27 * 864e5;
+    const to = todRange === "week" ? weekStart + 7 * 864e5 : today + 864e5;
+    const wins = S.entries().filter(e => e.ts >= from && e.ts < to && (e.actions.includes("plas") || e.actions.includes("poep")));
+    const perBlock = TOD_BLOCKS.map(() => ({ plas: 0, poep: 0 }));
+    const grid = Array.from({ length: 7 }, () => TOD_BLOCKS.map(() => 0));
+    wins.forEach(e => {
+      const b = todBlock(e.ts); if (b < 0) return;
+      if (e.actions.includes("plas")) perBlock[b].plas++;
+      if (e.actions.includes("poep")) perBlock[b].poep++;
+      const day = (new Date(e.ts).getDay() + 6) % 7;
+      grid[day][b] += e.actions.filter(a => a === "plas" || a === "poep").length;
+    });
+    const totals = perBlock.map(p => p.plas + p.poep);
+    const max = Math.max(1, ...totals);
+    const maxCell = Math.max(1, ...grid.flat());
+    const best = totals.indexOf(Math.max(...totals));
+    const label = ([a, b]) => `${a}–${b} uur`;
+    const days = ["ma", "di", "wo", "do", "vr", "za", "zo"];
+    const shade = n => n ? TOD_RAMP[Math.min(TOD_RAMP.length - 1, Math.ceil((n / maxCell) * (TOD_RAMP.length - 1)))] : "transparent";
+    return `
+      <div class="card tod-card">
+        <div class="tod-head">
+          <h2>⏰ Wanneer lukt het?</h2>
+          <div class="seg">${[["week", "Deze week"], ["4w", "4 weken"]].map(([k, l]) => `<button class="${todRange === k ? "on" : ""}" data-tod-range="${k}">${k === "week" && weekOffset !== 0 ? "Gekozen week" : l}</button>`).join("")}</div>
+        </div>
+        ${wins.length ? `
+          <p class="tod-best">Het lukt het vaakst tussen <b>${label(TOD_BLOCKS[best])}</b>. Een fijn moment om samen even te gaan zitten. 💛</p>
+          <div class="tod-bars" role="img" aria-label="Plasjes en poepjes per tijdstip">
+            ${TOD_BLOCKS.map((blk, i) => {
+              const p = perBlock[i], tip = `${label(blk)}: ${p.plas} ${p.plas === 1 ? "plasje" : "plasjes"}, ${p.poep} ${p.poep === 1 ? "poepje" : "poepjes"}`;
+              return `<button class="tod-bar-col" data-tip="${esc(tip)}" title="${esc(tip)}">
+                <span class="tod-val">${totals[i] || ""}</span>
+                <span class="tod-stack" style="height:${(totals[i] / max) * 100}%">
+                  ${p.poep ? `<span class="tod-seg poep" style="flex:${p.poep}"></span>` : ""}
+                  ${p.plas ? `<span class="tod-seg plas" style="flex:${p.plas}"></span>` : ""}
+                </span>
+                <span class="tod-x">${blk[0]}</span>
+              </button>`;
+            }).join("")}
+          </div>
+          <div class="tod-legend"><span><i class="plas"></i>Plasje</span><span><i class="poep"></i>Poepje</span><span class="tod-unit">uur van de dag</span></div>
+          <h3 class="tod-sub">Per dag</h3>
+          <div class="tod-heat" role="table" aria-label="Gelukt per dag en tijdstip">
+            <span></span>${TOD_BLOCKS.map(b => `<span class="tod-hx">${b[0]}</span>`).join("")}
+            ${grid.map((row, d) => `<span class="tod-hy">${days[d]}</span>${row.map((n, b) => {
+              const tip = `${days[d]} ${label(TOD_BLOCKS[b])}: ${n}× gelukt`;
+              return `<button class="tod-cell" style="background:${shade(n)}" data-tip="${esc(tip)}" title="${esc(tip)}">${n || ""}</button>`;
+            }).join("")}`).join("")}
+          </div>
+          <p class="hint">${todRange === "week" ? "Gebruik ◀ ▶ hierboven om een andere week te bekijken." : "De afgelopen 4 weken samen."} Tik op een vakje voor details.</p>
+        ` : `<p class="hint">Zodra er plasjes of poepjes op het potje zijn geregistreerd${todRange === "week" ? " in deze week" : ""}, zie je hier op welke tijden het goed gaat. 🌱</p>`}
+      </div>`;
   }
 
   function tabLog(root) {
@@ -807,6 +955,10 @@
         <h2>Kind</h2>
         <label class="field"><span>Naam van je kind <small>(voor de complimentjes)</small></span>
           <input name="childName" value="${esc(st.childName)}" maxlength="20" placeholder="Bijv. Noah"></label>
+        <label class="field"><span>Echte prijs <small>(wat je kind mag uitkiezen)</small></span>
+          <input name="rewardName" value="${esc(rewardName())}" maxlength="30"></label>
+        <label class="field"><span>Echte prijs elke … sterren</span>
+          <input name="rewardEvery" type="number" min="10" max="1000" step="10" value="${rewardEvery()}" inputmode="numeric"></label>
         <label class="switch"><input type="checkbox" name="sound" ${st.sound ? "checked" : ""}><span>Geluidjes</span></label>
         <label class="switch"><input type="checkbox" name="voice" ${st.voice ? "checked" : ""}><span>Mijn ingesproken zinnen afspelen <small>(inspreken bij 🎙️ Stem)</small></span></label>
 
@@ -840,6 +992,7 @@
       const f = e.target;
       S.updateSettings({
         childName: f.childName.value.trim(), sound: f.sound.checked, voice: f.voice.checked,
+        rewardName: f.rewardName.value.trim() || "miniatuurautootje", rewardEvery: Math.max(10, Math.min(1000, parseInt(f.rewardEvery.value, 10) || 100)),
         kidCanAward: f.kidCanAward.checked, kidCooldownMin: Number(f.kidCooldownMin.value),
       });
       toast("Instellingen opgeslagen ✅");
@@ -995,7 +1148,7 @@
   // Nieuwe gegevens van een ander apparaat: scherm verversen, maar nooit midden in iets wat iemand aan het doen is.
   let pendingRefresh = false;
   function refreshAfterSync() {
-    const overlayOpen = ["#overlay-cheer", "#overlay-unlock", "#overlay-ask"].some(id => !$(id).hidden);
+    const overlayOpen = ["#overlay-cheer", "#overlay-unlock", "#overlay-ask", "#overlay-film"].some(id => !$(id).hidden);
     const typing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
     const parentForm = current === "ouder" && !["overzicht", "logboek"].includes(parentTab);
     if (overlayOpen || typing || recording || parentForm) { pendingRefresh = true; return; }

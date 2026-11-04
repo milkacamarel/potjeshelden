@@ -25,6 +25,7 @@
       settingsTs: {},   // per instelling: wanneer voor het laatst gewijzigd
       voiceMeta: {},    // zin-id -> { ts, path?, sha?, deleted? } (voor het synchroniseren van opnames)
       resetAt: 0,       // moment van "alles wissen"
+      rewardsGiven: {}, // echte prijzen: sterrenaantal -> { given, ts } (door de ouder afgevinkt)
     };
   }
 
@@ -107,6 +108,9 @@
 
     setVoiceMeta(id, meta) { state.voiceMeta[id] = meta; save(); },
 
+    /** Ouder vinkt aan dat de echte prijs bij dit aantal sterren gegeven is (of zet het terug). */
+    setRewardGiven(cost, given) { state.rewardsGiven = { ...(state.rewardsGiven || {}), [cost]: { given, ts: Date.now() } }; save(); },
+
     exportJSON() { return JSON.stringify(state, null, 2); },
 
     importJSON(text) {
@@ -123,9 +127,9 @@
 
     /** Sterren, unlocks en logboek opnieuw beginnen. Knoppen, instellingen en opnames blijven bewaard. */
     resetAll() {
-      const { settings, settingsUpdatedAt, voiceMeta } = state;
+      const { settings, settingsUpdatedAt, settingsTs, voiceMeta } = state;
       state = freshState();
-      Object.assign(state, { settings, settingsUpdatedAt, voiceMeta, resetAt: Date.now() });
+      Object.assign(state, { settings, settingsUpdatedAt, settingsTs, voiceMeta, resetAt: Date.now() });
       save();
     },
   };

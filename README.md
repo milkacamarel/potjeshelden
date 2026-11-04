@@ -35,25 +35,30 @@ Grote knoppen voor **Spelen!** (kindermodus) en **Mijn garage** (verzameling). D
 ### Kindermodus
 - Zes grote knoppen met plaatjes: 🚽 Zitten, 💪 Geprobeerd, 🙋 Ik moet!, 💧 Plasje, 💩 Poepje, 🧼 Handen.
 - Na elke tik volgt een feestje met sterren, een geluidje en, als je die hebt ingesproken, jouw eigen stem.
-- Bovenaan staat een voortgangsbalk met het volgende voertuig als silhouet: *"Nog 2 sterren tot je nieuwe graafmachine!"*
+- Helemaal bovenaan staat de **echte prijs**: elke 100 sterren mag je kind een echt miniatuurautootje uitkiezen. Een grote oranje balk laat zien hoeveel sterren er nog nodig zijn. Bij 100, 200, 300 … volgt een extra groot feest, en tot jij de prijs hebt gegeven staat er *"Er ligt een echt miniatuurautootje voor je klaar!"*. Hoe vaak en wat de prijs is, stel je in bij Instellingen.
+- Daaronder een voortgangsbalk met het volgende item als silhouet: *"Nog 2 sterren tot je nieuwe graafmachine!"*
+- 📺 **Potjesfilmpje**: vier rustige tekenfilmpjes (graafmachine, brandweer met puppy, racewagens, raket naar de maan) om naar te kijken terwijl je kind op het potje zit. Na *Zitten* verschijnt ook een knop *Filmpje kijken*.
 - Komt er een nieuw item vrij, dan verschijnt een groot "Nieuw in je garage!"-scherm.
 - Zo voorkom je eindeloos tikken: dezelfde knop geeft pas na een paar minuten weer sterren (instelbaar). Je kind krijgt wel altijd een compliment.
 
 ### Garage (unlock-scherm)
-Drie werelden met elk 11 items: voertuigen, helden, accessoires, stickers en decorstukken.
-- 🚒 **Reddingswereld**: puppyhelden, brandweerwagen, reddingshelikopter …
-- 🏎️ **Racewereld**: raceauto's, coureurs, finishvlag, gouden beker …
-- 🏗️ **Bouwplaatswereld**: kiepwagen, graafmachine, bulldozer, hijskraan …
+Vijf werelden plus de Prijzenkast, met voertuigen, helden, accessoires, stickers, decorstukken en trofeeën. De prijzen lopen door tot zo'n 600 sterren.
+- 🚒 **Reddingswereld**: puppyhelden, brandweerwagen, reddingshelikopter, reddingsboot …
+- 🏎️ **Racewereld**: raceauto's, coureurs, finishvlag, gouden beker, monstertruck …
+- 🏗️ **Bouwplaatswereld**: kiepwagen, graafmachine, bulldozer, hijskraan, betonmolen …
+- 🚀 **Ruimtewereld**: raketten, maanwagen, ruimtepuppy, ufo …
+- 🦖 **Dinowereld**: vrolijke dino's (Langnek Lotje, Brulsaurus Bram, Driehoorn Dirk, Stekeltje), dino-eieren en dinotrofeeën van brons tot diamant.
+- 🎁 **Prijzenkast**: een prijsautootje voor elke 100 sterren. Deze kast groeit vanzelf mee, er is dus altijd een volgend doel.
 
 Wat nog op slot zit, zie je als silhouet met het aantal sterren dat nodig is.
 
 ### Oudermodus
 - **Registreren**: datum en tijd, aanvinken wat er goed ging, bijzonderheden. Sterren worden automatisch berekend, of je kiest zelf een aantal. Daarnaast zijn er knoppen voor een snelle bonus (+1, +2, +3, +5).
-- **Overzicht**: vandaag in één oogopslag, een weekgrafiek (met bladeren naar vorige weken) en hoeveel er per wereld verzameld is.
+- **Overzicht**: bovenaan de **echte prijzen**, die je afvinkt als je ze gegeven hebt. Dan vandaag in één oogopslag, een weekgrafiek (met bladeren naar vorige weken) de grafiek **Wanneer lukt het?** (plasjes en poepjes per tijdstip van de dag, per week of over 4 weken, plus een overzicht per dag) en hoeveel er per wereld verzameld is.
 - **Logboek**: alle registraties per dag, met wie ze invoerde (kind, ouder of bonus). Een verkeerde invoer kun je weghalen. De sterren blijven dan wel staan.
 - **Knoppen**: pas het aantal sterren per knop aan, zet knoppen aan of uit, en maak eigen knoppen met tekst, plaatje, kleur en sterren (met snelle ideeën zoals *Droge broek* en *Zelf afvegen*). Eigen knoppen verschijnen meteen in de kindermodus, het registratieformulier en bij 🎙️ Stem.
 - **Stem**: spreek zelf de zinnen in die je kind hoort (zie hieronder).
-- **Instellingen**: naam van je kind (standaard Lulu), geluidjes en je ingesproken zinnen aan/uit, of het kind zelf sterren mag geven, de wachttijd per knop, punten per stap, back-up downloaden/terugzetten en alles wissen.
+- **Instellingen**: naam van je kind (standaard Lulu), de echte prijs en na hoeveel sterren, geluidjes en je ingesproken zinnen aan/uit, of het kind zelf sterren mag geven, de wachttijd per knop, punten per stap, back-up downloaden/terugzetten en alles wissen.
 
 ### Standaard puntentabel
 
@@ -113,6 +118,7 @@ zindelijkheidsapp/
 │   ├── storage.js    Opslaan en laden in localStorage, back-up, reset
 │   ├── voice.js      Eigen stemopnames: opnemen, bewaren (IndexedDB) en afspelen
 │   ├── sync.js       Apparaten gelijk houden via een privé GitHub-repository
+│   ├── film.js       Het Potjesfilmpje (vier geanimeerde scènes)
 │   └── app.js        Schermen, navigatie, beloningen, vieringen, oudermodus
 └── README.md
 ```

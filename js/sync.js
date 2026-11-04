@@ -97,6 +97,8 @@
     [local, remote].filter(keep).forEach(side => Object.entries(side.lastKidTap || {}).forEach(([k, v]) => { taps[k] = Math.max(taps[k] || 0, v); }));
 
     const settings = mergeSettings(local, remote);
+    const rewards = {};
+    [local, remote].filter(keep).forEach(side => Object.entries(side.rewardsGiven || {}).forEach(([k, v]) => { if (!rewards[k] || v.ts > rewards[k].ts) rewards[k] = v; }));
 
     return {
       ...local,
@@ -108,6 +110,7 @@
       settingsTs: settings.ts,
       settingsUpdatedAt: Math.max(local.settingsUpdatedAt || 0, remote.settingsUpdatedAt || 0),
       voiceMeta: { ...(local.voiceMeta || {}) }, // wordt per zin bijgewerkt in syncVoice
+      rewardsGiven: rewards,
       resetAt,
     };
   }
@@ -168,8 +171,8 @@
   }
 
   function toRemote(s) {
-    const { log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, resetAt } = s;
-    return { app: "potjeshelden", version: 2, log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, resetAt };
+    const { log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, rewardsGiven, resetAt } = s;
+    return { app: "potjeshelden", version: 2, log, seenUnlocks, lastKidTap, settings, settingsTs, settingsUpdatedAt, voiceMeta, rewardsGiven: rewardsGiven || {}, resetAt };
   }
 
   /* ---------- De sync zelf ---------- */

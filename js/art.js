@@ -133,6 +133,109 @@
       <rect x="30" y="33" width="60" height="6" rx="3" fill="${helmet}"/>
       <rect x="57" y="12" width="6" height="22" rx="3" fill="#00000018"/>`, "0 0 120 95"),
 
+    raket: ({ c = "#eceff1", c2 = "#e53935", win = "#4fc3f7" } = {}) => svg(`
+      <path d="M60 4 Q82 24 80 60 L40 60 Q38 24 60 4 Z" fill="${c}" stroke="#cfd8dc" stroke-width="2"/>
+      <path d="M60 4 Q72 14 76 28 L44 28 Q48 14 60 4 Z" fill="${c2}"/>
+      <circle cx="60" cy="40" r="9" fill="${win}" stroke="#90a4ae" stroke-width="3"/>
+      <path d="M40 46 L24 66 L40 62 Z M80 46 L96 66 L80 62 Z" fill="${c2}"/>
+      <rect x="46" y="60" width="28" height="6" rx="2" fill="#90a4ae"/>
+      <path d="M48 66 Q60 92 72 66 Z" fill="#ffb300"/><path d="M53 66 Q60 82 67 66 Z" fill="#fff176"/>`, "0 0 120 95"),
+
+    maanwagen: ({ c = "#b0bec5", c2 = "#7c4dff" } = {}) => svg(`
+      <rect x="18" y="42" width="84" height="16" rx="6" fill="${c}"/>
+      <path d="M34 42 L44 24 L76 24 L86 42 Z" fill="${c2}"/>
+      <path d="M48 28 L72 28 L78 40 L42 40 Z" fill="#bfe9ff"/>
+      <line x1="88" y1="42" x2="96" y2="14" stroke="#607d8b" stroke-width="3"/><circle cx="96" cy="12" r="6" fill="#ffeb3b"/>
+      ${wheel(30, 66, 12)}${wheel(60, 66, 12)}${wheel(90, 66, 12)}`),
+
+    betonmolen: ({ c = "#ff7043", c2 = "#eceff1" } = {}) => svg(`
+      <rect x="76" y="30" width="32" height="30" rx="6" fill="${c}"/>
+      <rect x="82" y="35" width="18" height="12" rx="3" fill="#bfe9ff"/>
+      <ellipse cx="44" cy="40" rx="34" ry="18" fill="${c2}" transform="rotate(-12 44 40)"/>
+      <path d="M18 34 L70 22 M22 44 L74 32 M26 54 L76 42" stroke="${c}" stroke-width="4" opacity=".8"/>
+      <rect x="6" y="58" width="104" height="8" rx="3" fill="#5b5f73"/>
+      ${wheel(24, 70, 11)}${wheel(48, 70, 11)}${wheel(92, 70, 11)}`),
+
+    reddingsboot: ({ c = "#ff6d00", c2 = "#ffffff" } = {}) => svg(`
+      <path d="M0 70 Q15 64 30 70 T60 70 T90 70 T120 70 L120 90 L0 90 Z" fill="#4fc3f7"/>
+      <path d="M10 56 L110 56 L98 74 L22 74 Z" fill="${c}"/>
+      <rect x="10" y="60" width="100" height="4" fill="${c2}"/>
+      <rect x="40" y="32" width="40" height="24" rx="4" fill="${c2}"/>
+      <rect x="46" y="37" width="12" height="10" rx="2" fill="#bfe9ff"/><rect x="62" y="37" width="12" height="10" rx="2" fill="#bfe9ff"/>
+      <rect x="56" y="22" width="8" height="10" rx="2" fill="#42a5f5"/>
+      <circle cx="26" cy="50" r="7" fill="none" stroke="${c2}" stroke-width="4"/><circle cx="26" cy="50" r="7" fill="none" stroke="${c}" stroke-width="4" stroke-dasharray="5 6"/>`),
+
+    monstertruck: ({ c = "#00c853", c2 = "#ffea00" } = {}) => svg(`
+      <path d="M18 40 L34 24 L74 24 L90 40 L106 42 L106 54 L14 54 L14 42 Z" fill="${c}"/>
+      <path d="M40 28 L70 28 L80 40 L34 40 Z" fill="#bfe9ff"/>
+      <path d="M18 48 L104 48" stroke="${c2}" stroke-width="4"/>
+      <rect x="40" y="54" width="40" height="6" fill="#5b5f73"/>
+      ${wheel(30, 66, 18)}${wheel(90, 66, 18)}`, "0 0 120 90"),
+
+    /* ---- Dinowereld: vriendelijke, eigen dino's (geen tanden, altijd een glimlach) ---- */
+    langnek: ({ c = "#81c784", c2 = "#388e3c" } = {}) => svg(`
+      <path d="M36 56 Q16 58 4 70 Q20 68 38 64 Z" fill="${c}"/>
+      <path d="M74 52 Q86 30 90 16 L102 18 Q96 38 86 58 Z" fill="${c}"/>
+      <ellipse cx="102" cy="15" rx="12" ry="8" fill="${c}"/>
+      <circle cx="105" cy="12" r="2.4" fill="#2b2b38"/><path d="M104 18 Q109 20 112 16" stroke="#2b2b38" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <rect x="40" y="62" width="10" height="20" rx="4" fill="${c2}"/><rect x="70" y="62" width="10" height="20" rx="4" fill="${c2}"/>
+      <ellipse cx="60" cy="56" rx="30" ry="18" fill="${c}"/>
+      <rect x="50" y="64" width="10" height="18" rx="4" fill="${c}"/><rect x="78" y="62" width="10" height="20" rx="4" fill="${c}"/>
+      <circle cx="52" cy="48" r="4" fill="${c2}" opacity=".6"/><circle cx="64" cy="44" r="3" fill="${c2}" opacity=".6"/><circle cx="70" cy="54" r="3.5" fill="${c2}" opacity=".6"/>`),
+
+    tyranno: ({ c = "#ff8a65", c2 = "#e64a19" } = {}) => svg(`
+      <path d="M40 50 Q14 56 2 74 Q22 70 44 62 Z" fill="${c}"/>
+      <rect x="44" y="62" width="11" height="22" rx="4" fill="${c2}"/>
+      <ellipse cx="58" cy="54" rx="22" ry="16" fill="${c}"/>
+      <rect x="58" y="62" width="11" height="22" rx="4" fill="${c}"/>
+      <path d="M66 42 Q70 18 92 14 Q114 12 114 30 Q114 42 96 42 Q80 44 74 50 Z" fill="${c}"/>
+      <circle cx="96" cy="23" r="3" fill="#2b2b38"/><circle cx="97" cy="22" r="1" fill="#fff"/>
+      <path d="M92 34 Q102 38 110 33" stroke="#2b2b38" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="106" cy="30" r="3" fill="#ffab91" opacity=".8"/>
+      <path d="M74 54 Q82 56 82 62" stroke="${c2}" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M46 44 L50 36 L54 42 L58 34 L62 41" fill="${c2}"/>`),
+
+    driehoorn: ({ c = "#4fc3f7", c2 = "#0277bd" } = {}) => svg(`
+      <path d="M28 54 Q12 56 4 66 Q18 66 30 62 Z" fill="${c}"/>
+      <rect x="34" y="62" width="11" height="20" rx="4" fill="${c2}"/><rect x="64" y="62" width="11" height="20" rx="4" fill="${c2}"/>
+      <ellipse cx="52" cy="54" rx="26" ry="17" fill="${c}"/>
+      <rect x="44" y="64" width="11" height="18" rx="4" fill="${c}"/><rect x="72" y="62" width="11" height="20" rx="4" fill="${c}"/>
+      <circle cx="80" cy="42" r="20" fill="${c2}"/>
+      <ellipse cx="92" cy="52" rx="17" ry="13" fill="${c}"/>
+      <path d="M86 40 L82 20 L92 38 Z M98 40 L102 20 L104 40 Z" fill="#fff8e1"/>
+      <path d="M106 50 L118 44 L108 56 Z" fill="#fff8e1"/>
+      <circle cx="94" cy="48" r="2.6" fill="#2b2b38"/>
+      <path d="M96 58 Q102 60 106 56" stroke="#2b2b38" stroke-width="1.6" fill="none" stroke-linecap="round"/>`),
+
+    stekeldino: ({ c = "#ba68c8", c2 = "#ffb300" } = {}) => svg(`
+      <path d="M32 40 L38 22 L46 36 L52 16 L60 34 L68 18 L74 36 L82 26 L84 44 Z" fill="${c2}"/>
+      <path d="M30 56 Q10 54 2 44 Q8 62 30 64 Z" fill="${c}"/>
+      <path d="M6 48 L2 38 L10 46 Z M12 52 L10 42 L16 50 Z" fill="${c2}"/>
+      <rect x="36" y="62" width="10" height="20" rx="4" fill="${c}" opacity=".85"/><rect x="70" y="62" width="10" height="20" rx="4" fill="${c}" opacity=".85"/>
+      <path d="M28 60 Q34 34 60 34 Q86 34 92 60 Z" fill="${c}"/>
+      <rect x="46" y="62" width="10" height="20" rx="4" fill="${c}"/><rect x="78" y="60" width="10" height="22" rx="4" fill="${c}"/>
+      <ellipse cx="102" cy="58" rx="13" ry="9" fill="${c}"/>
+      <circle cx="105" cy="55" r="2.4" fill="#2b2b38"/><path d="M104 62 Q109 64 113 60" stroke="#2b2b38" stroke-width="1.6" fill="none" stroke-linecap="round"/>`),
+
+    dino_ei: ({ c = "#fff3e0", c2 = "#8bc34a" } = {}) => svg(`
+      <ellipse cx="60" cy="84" rx="30" ry="5" fill="#00000018"/>
+      <path d="M60 6 Q90 8 90 50 Q90 84 60 84 Q30 84 30 50 Q30 8 60 6 Z" fill="${c}" stroke="#e0c9a6" stroke-width="2"/>
+      <circle cx="48" cy="34" r="6" fill="${c2}"/><circle cx="70" cy="26" r="4" fill="${c2}"/><circle cx="74" cy="56" r="7" fill="${c2}"/><circle cx="46" cy="64" r="4.5" fill="${c2}"/>
+      <path d="M36 46 L44 40 L50 48 L58 40 L64 48 L72 40 L78 48 L84 44" stroke="#a1887f" stroke-width="2.5" fill="none" stroke-linejoin="round"/>`, "0 0 120 92"),
+
+    dinotrofee: ({ c = "#ffc107", c2 = "#ff8f00", dino = "#66bb6a" } = {}) => svg(`
+      <path d="M38 14 L82 14 L78 46 Q74 60 60 60 Q46 60 42 46 Z" fill="${c}"/>
+      <path d="M40 18 Q24 18 26 32 Q28 42 42 42" stroke="${c2}" stroke-width="5" fill="none"/>
+      <path d="M80 18 Q96 18 94 32 Q92 42 78 42" stroke="${c2}" stroke-width="5" fill="none"/>
+      <path d="M46 18 L50 46" stroke="#ffffff" stroke-width="4" opacity=".45" stroke-linecap="round"/>
+      <rect x="54" y="58" width="12" height="12" fill="${c2}"/>
+      <rect x="40" y="70" width="40" height="14" rx="3" fill="${c2}"/>
+      <rect x="46" y="74" width="28" height="6" rx="2" fill="${c}"/>
+      <ellipse cx="62" cy="34" rx="9" ry="6" fill="${dino}"/><path d="M68 32 Q74 22 78 22 L80 26 Q76 28 72 36 Z" fill="${dino}"/>
+      <path d="M54 34 Q48 36 46 40 Q52 39 56 37 Z" fill="${dino}"/>
+      <rect x="57" y="38" width="3" height="6" rx="1" fill="${dino}"/><rect x="64" y="38" width="3" height="6" rx="1" fill="${dino}"/>
+      <circle cx="78.5" cy="23.5" r="1" fill="#2b2b38"/>`, "0 0 120 90"),
+
     potje: ({ c = "#4fc3f7" } = {}) => svg(`
       <ellipse cx="60" cy="40" rx="40" ry="12" fill="${c}"/>
       <ellipse cx="60" cy="40" rx="28" ry="7" fill="#e1f5fe"/>

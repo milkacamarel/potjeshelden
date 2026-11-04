@@ -140,10 +140,12 @@ svg { display: block; width: 100%; height: 100%; }
 /* ---------- Garage ---------- */
 #screen-garage { --world-bg: none; }
 body[data-screen="garage"] { background: var(--world-bg, var(--bg)); background-color: var(--bg); }
-.world-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.world-tab { border: 0; border-radius: 22px; padding: 10px 4px; background: #ffffffb0; display: flex; flex-direction: column; align-items: center; font-weight: 800; font-size: 1.05rem; border: 3px solid transparent; }
+.world-tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+@media (max-width: 560px) { .world-tabs { grid-template-columns: repeat(3, 1fr); } }
+.world-tab { border: 0; border-radius: 22px; padding: 10px 4px; background: #ffffffb0; display: flex; flex-direction: column; align-items: center; font-weight: 800; font-size: .85rem; border: 3px solid transparent; min-width: 0; }
 .world-tab.active { background: #fff; border-color: var(--c); box-shadow: var(--shadow); transform: translateY(-2px); }
-.wt-emoji { font-size: 2.4rem; line-height: 1.1; }
+.wt-emoji { font-size: 2rem; line-height: 1.1; }
+.wt-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .world-head { margin: 16px 4px 12px; }
 .world-head h2 { margin: 0; font-size: 1.8rem; color: var(--accent); }
 .world-count { font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
@@ -314,3 +316,64 @@ body[data-screen="ouder"] { background: #f6f4ef; -webkit-user-select: auto; user
 @keyframes drive { from { left: -110px; } to { left: 100%; } }
 @keyframes toastIn { from { transform: translate(-50%, 20px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; } }
+
+/* ---------- Echte prijs (kinderscherm) ---------- */
+.reward-card { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; padding: 14px; border-radius: var(--radius);
+  background: linear-gradient(135deg, #fff3e0, #ffe0ec); border: 4px solid #ffb74d; box-shadow: var(--shadow); }
+.reward-art { position: relative; width: 104px; height: 78px; flex: none; animation: bob 2.4s ease-in-out infinite; }
+.reward-gift { position: absolute; right: -6px; top: -12px; font-size: 1.9rem; animation: wiggle 1.8s ease-in-out infinite; }
+.reward-gift.big { font-size: 3rem; right: 0; top: -10px; }
+.reward-body { flex: 1; min-width: 0; }
+.reward-title { font-size: 1.45rem; font-weight: 800; color: #e65100; line-height: 1.1; }
+.reward-text { font-size: 1.1rem; font-weight: 700; margin: 4px 0 8px; }
+.reward-bar { height: 30px; }
+.reward-bar .bar-fill { background: linear-gradient(90deg, #ffb74d, #ff6f00); }
+.reward-ready { margin: -4px 0 14px; padding: 12px 16px; border-radius: 20px; background: #fff; border: 3px dashed #ff6f00; font-weight: 800; font-size: 1.1rem; color: #bf360c; text-align: center; animation: popIn .45s; }
+.reward-unlock { border: 5px solid #ffb74d; background: linear-gradient(180deg, #fffaf0, #fff); }
+.reward-unlock .unlock-name { color: #e65100; }
+
+/* ---------- Potjesfilmpje ---------- */
+.btn-film { background: linear-gradient(180deg, #d1b3ff, #7e57c2); color: #fff; box-shadow: 0 7px 0 #4d2c91, 0 14px 26px rgba(126,87,194,.3); margin-bottom: 6px; }
+.cheer-card .btn-film { margin-top: 10px; }
+#overlay-film { z-index: 55; background: rgba(30, 24, 60, .9); }
+.film-card { width: min(760px, 100%); display: grid; gap: 12px; animation: popIn .4s; }
+.film-stage { aspect-ratio: 400 / 260; border-radius: 28px; overflow: hidden; background: #bde7ff; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+.film-dots { display: flex; justify-content: center; gap: 10px; }
+.film-dot { width: 58px; height: 58px; border-radius: 50%; border: 3px solid transparent; background: #ffffff30; font-size: 1.8rem; display: grid; place-items: center; }
+.film-dot.on { background: #fff; border-color: var(--sun); }
+.film-done { justify-self: center; min-width: 220px; }
+
+/* ---------- Echte prijzen (oudermodus) ---------- */
+.prize-card { border: 3px solid #ffcc80; }
+.prize-list { display: grid; gap: 8px; margin-top: 10px; }
+.prize-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-radius: 16px; background: #fff3e0; cursor: pointer; }
+.prize-row.done { background: #eef7ee; }
+.prize-art { width: 64px; height: 48px; flex: none; }
+.prize-text { flex: 1; display: grid; }
+.prize-text small { color: var(--ink-soft); font-weight: 600; }
+
+/* ---------- Wanneer lukt het? ---------- */
+.tod-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.tod-head h2 { margin: 0 !important; }
+.seg { display: inline-flex; background: #f1ead8; border-radius: 999px; padding: 3px; }
+.seg button { border: 0; background: transparent; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: .9rem; font-weight: 700; color: var(--ink-soft); }
+.seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+.tod-best { margin: 0 0 10px; }
+.tod-bars { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; height: 160px; align-items: end; border-bottom: 1px solid var(--line); }
+.tod-bar-col { height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; border: 0; background: transparent; padding: 0 2px; font: inherit; position: relative; }
+.tod-bar-col:hover .tod-stack, .tod-bar-col:focus-visible .tod-stack { filter: brightness(1.06); outline: 2px solid var(--ink); outline-offset: 1px; }
+.tod-val { font-size: .8rem; font-weight: 700; color: var(--ink-soft); min-height: 1.1em; }
+.tod-stack { width: 100%; max-width: 34px; display: flex; flex-direction: column; gap: 2px; border-radius: 4px 4px 0 0; overflow: hidden; }
+.tod-seg { display: block; min-height: 3px; }
+.tod-seg.plas { background: #29b6f6; }
+.tod-seg.poep { background: #8d6e63; }
+.tod-x { position: absolute; bottom: -20px; font-size: .75rem; color: var(--ink-soft); }
+.tod-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; font-size: .85rem; color: var(--ink-soft); }
+.tod-legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.tod-legend i.plas { background: #29b6f6; } .tod-legend i.poep { background: #8d6e63; }
+.tod-unit { margin-left: auto; }
+.tod-sub { margin: 16px 0 6px; font-size: 1.05rem; }
+.tod-heat { display: grid; grid-template-columns: 28px repeat(8, 1fr); gap: 3px; margin-bottom: 8px; }
+.tod-hx, .tod-hy { font-size: .75rem; color: var(--ink-soft); text-align: center; align-self: center; }
+.tod-cell { aspect-ratio: 1.4; min-height: 26px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: .8rem; font-weight: 700; color: #5a3500; padding: 0; }
+.tod-cell:hover, .tod-cell:focus-visible { outline: 2px solid var(--ink); }
