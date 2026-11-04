@@ -940,7 +940,9 @@
       toast(ok ? "Opname toegevoegd ✅" : "Dit geluidsbestand kan deze browser niet afspelen.");
       tabVoice(root);
     }));
-    $$("[data-play]", root).forEach(b => b.addEventListener("click", () => Voice.play(b.dataset.play)));
+    $$("[data-play]", root).forEach(b => b.addEventListener("click", async () => {
+      if (!(await Voice.play(b.dataset.play))) toast("Deze opname kan dit apparaat niet afspelen. Neem hem hier opnieuw op.");
+    }));
     $$("[data-delvoice]", root).forEach(b => b.addEventListener("click", () => {
       ask("Deze opname wissen?", "Ja, wissen").then(ok => { if (ok) Voice.remove(b.dataset.delvoice).then(() => tabVoice(root)); });
     }));
@@ -1150,7 +1152,7 @@
   function refreshAfterSync() {
     const overlayOpen = ["#overlay-cheer", "#overlay-unlock", "#overlay-ask", "#overlay-film"].some(id => !$(id).hidden);
     const typing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
-    const parentForm = current === "ouder" && !["overzicht", "logboek"].includes(parentTab);
+    const parentForm = current === "ouder" && !["overzicht", "logboek", "stem"].includes(parentTab);
     if (overlayOpen || typing || recording || parentForm) { pendingRefresh = true; return; }
     pendingRefresh = false;
     go(current, { refresh: true });

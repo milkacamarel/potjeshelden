@@ -73,7 +73,17 @@
   async function getAudio(path) {
     const res = await gh(`contents/${path}`, { headers: { Accept: "application/vnd.github.raw+json" } });
     if (!res.ok) throw httpError(res);
-    return res.blob();
+    // GitHub geeft geen geluidstype mee: zelf invullen aan de hand van de bestandsnaam (nodig voor iPhone/iPad).
+    const ext = (path.match(/\.(\w+)$/) || [])[1];
+    const type = { m4a: "audio/mp4", webm: "audio/webm", mp3: "audio/mpeg", wav: "audio/wav", ogg: "audio/ogg" }[ext] || "";
+    return new Blob([await res.arrayBuffer()], { type });
+  }
+
+  // Opnames die hier nog ontbreken (bijv. ophalen mislukt, of de opslag van de iPhone is opgeruimd)
+  let audioMissing = false, audioTriedAt = 0;
+  async function fetchAudio(id, R) {
+    try { await Voice.putLocal(id, await getAudio(R.path)); }
+    catch (e) { if (e.status === 401 || e.status === 403) throw e; audioMissing = true; }
   }
 
   function httpError(res) { const e = new Error(`GitHub ${res.status}`); e.status = res.status; return e; }
@@ -143,6 +153,7 @@
   /** Per zin: de nieuwste opname wint. Uploadt, downloadt of wist waar nodig. */
   async function syncVoice(merged, localMeta, remoteMeta) {
     const ids = new Set([...Object.keys(localMeta || {}), ...Object.keys(remoteMeta || {})]);
+    audioMissing = false; audioTriedAt = Date.now();
     for (const id of ids) {
       const L = localMeta[id], R = (remoteMeta || {})[id];
       if (L && (!R || L.ts > R.ts)) {
@@ -162,10 +173,12 @@
       } else if (R && (!L || R.ts > L.ts)) {
         // Een ander apparaat heeft de nieuwste versie
         if (R.deleted) await Voice.dropLocal(id);
-        else if (R.path) await Voice.putLocal(id, await getAudio(R.path));
+        else if (R.path) await fetchAudio(id, R);
         merged.voiceMeta[id] = R;
       } else if (R) {
         merged.voiceMeta[id] = R.path || R.deleted ? R : L;
+        // Zelfde versie, maar het geluid zelf staat (nog) niet op dit apparaat: alsnog ophalen
+        if (R.path && !R.deleted && !Voice.has(id)) await fetchAudio(id, R);
       }
     }
   }
@@ -196,7 +209,8 @@
         const remote = await getData();
         // GitHub geeft vlak na een wijziging soms nog even de oude versie terug: dan kort wachten en opnieuw vragen
         if (remote.sha && superseded.has(remote.sha)) { await new Promise(r => setTimeout(r, 600 + attempt * 400)); continue; }
-        if (remote.unchanged && !wasDirty) break; // niets nieuws, aan beide kanten
+        const retryAudio = audioMissing && Date.now() - audioTriedAt > 30000;
+        if (remote.unchanged && !wasDirty && !retryAudio) break; // niets nieuws, aan beide kanten
         const before = stable(toRemote(Store.state));
         const merged = merge(Store.state, remote.data);
         await syncVoice(merged, Store.state.voiceMeta, remote.data && remote.data.voiceMeta);

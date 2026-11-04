@@ -56,7 +56,12 @@
     async init() {
       try {
         const keys = await run("readonly", s => s.getAllKeys());
-        for (const k of keys || []) blobs[k] = await run("readonly", s => s.get(k));
+        for (const k of keys || []) {
+          const v = await run("readonly", s => s.get(k));
+          // Nieuw formaat: { type, data: ArrayBuffer } (werkt ook op iPhone/iPad). Oud formaat: een Blob.
+          if (v && v.data) blobs[k] = new Blob([v.data], { type: v.type || "" });
+          else if (v) blobs[k] = v;
+        }
       } catch (e) { /* geen opslag beschikbaar */ }
       // Opnames van vóór het synchroniseren krijgen alsnog een tijdstempel, zodat ze meegaan naar andere apparaten.
       const meta = Store.state.voiceMeta;
@@ -81,7 +86,11 @@
     /** Alleen op dit apparaat bewaren (gebruikt door sync.js voor opnames van een ander apparaat). */
     async putLocal(id, blob) {
       blobs[id] = blob; delete buffers[id];
-      try { await run("readwrite", s => s.put(blob, id)); } catch (e) { /* alleen deze sessie */ }
+      // Als ArrayBuffer bewaren: Safari op iPhone/iPad kan Blobs in IndexedDB soms niet bewaren.
+      try {
+        const data = await blob.arrayBuffer();
+        await run("readwrite", s => s.put({ type: blob.type || "", data }, id));
+      } catch (e) { /* alleen deze sessie; sync.js haalt hem de volgende keer opnieuw op */ }
     },
 
     async dropLocal(id) {
@@ -92,16 +101,26 @@
     /** Speel een opname af. Geeft false terug als er geen opname is. */
     async play(id, delay = 0) {
       if (!blobs[id]) return false;
+      if (currentSource) try { currentSource.stop(); } catch (e) { /* al gestopt */ }
+      currentSource = null;
       try {
         const c = audioCtx();
         const buf = await decode(id);
-        if (currentSource) try { currentSource.stop(); } catch (e) { /* al gestopt */ }
         const src = c.createBufferSource();
         src.buffer = buf; src.connect(c.destination);
         src.start(c.currentTime + delay);
         currentSource = src;
         return true;
-      } catch (e) { return false; }
+      } catch (e) {
+        // Web Audio kan dit formaat niet lezen: probeer het gewone audio-element van de browser.
+        try {
+          const a = new Audio(URL.createObjectURL(blobs[id]));
+          if (delay) await new Promise(r => setTimeout(r, delay * 1000));
+          await a.play();
+          currentSource = { stop: () => a.pause() };
+          return true;
+        } catch (e2) { return false; }
+      }
     },
 
     /** Speel de eerste zin uit de lijst waarvan een opname bestaat (willekeurig binnen een groep). */
@@ -117,7 +136,10 @@
     /** Start een opname. Geeft { stop(), done } terug; done levert de Blob. Stopt zelf na maxSec. */
     async record(maxSec = 10) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const rec = new MediaRecorder(stream);
+      // Bij voorkeur mp4/aac: dat speelt op alle apparaten (ook iPhone/iPad). Anders wat de browser kiest.
+      const type = ["audio/mp4;codecs=mp4a.40.2", "audio/mp4", "audio/aac"].find(t => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t));
+      let rec;
+      try { rec = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream); } catch (e) { rec = new MediaRecorder(stream); }
       const chunks = [];
       rec.ondataavailable = e => e.data.size && chunks.push(e.data);
       const done = new Promise(resolve => {
