@@ -42,12 +42,13 @@ Grote knoppen voor **Spelen!** (kindermodus) en **Mijn garage** (verzameling). D
 - Zo voorkom je eindeloos tikken: dezelfde knop geeft pas na een paar minuten weer sterren (instelbaar). Je kind krijgt wel altijd een compliment.
 
 ### Garage (unlock-scherm)
-Vijf werelden plus de Prijzenkast, met voertuigen, helden, accessoires, stickers, decorstukken en trofeeën. De prijzen lopen door tot zo'n 600 sterren.
+Vijf werelden, de Trofeeënkast en de Prijzenkast, met voertuigen, helden, accessoires, stickers, decorstukken en trofeeën. De prijzen lopen door tot zo'n 820 sterren.
 - 🚒 **Reddingswereld**: puppyhelden, brandweerwagen, reddingshelikopter, reddingsboot …
 - 🏎️ **Racewereld**: raceauto's, coureurs, finishvlag, gouden beker, monstertruck …
 - 🏗️ **Bouwplaatswereld**: kiepwagen, graafmachine, bulldozer, hijskraan, betonmolen …
 - 🚀 **Ruimtewereld**: raketten, maanwagen, ruimtepuppy, ufo …
 - 🦖 **Dinowereld**: vrolijke dino's (Langnek Lotje, Brulsaurus Bram, Driehoorn Dirk, Stekeltje), dino-eieren en dinotrofeeën van brons tot diamant.
+- 🏆 **Trofeeënkast**: 16 trofeeën met een superheld, een monstertje, een astronaut of een ringplaneet, van brons (vanaf 110) tot diamant (tot 820 sterren).
 - 🎁 **Prijzenkast**: een prijsautootje voor elke 100 sterren. Deze kast groeit vanzelf mee, er is dus altijd een volgend doel.
 
 Wat nog op slot zit, zie je als silhouet met het aantal sterren dat nodig is.
