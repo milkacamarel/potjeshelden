@@ -10,6 +10,28 @@
   const svg = (body, vb = "0 0 120 90") =>
     `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 
+
+  // Ster-vorm (voor de ruimte- en heldentrofee).
+  const star = (cx, cy, r, fill, stroke) => {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r;
+      pts.push(`${(cx + rr * Math.cos(a)).toFixed(1)},${(cy + rr * Math.sin(a)).toFixed(1)}`);
+    }
+    return `<polygon points="${pts.join(" ")}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width=".9" stroke-linejoin="round"` : ""}/>`;
+  };
+
+  // Gewone beker met oren en voetstuk; "figuur" komt vóór op de beker.
+  const beker = (c, c2, figuur) => svg(`
+      <path d="M38 14 L82 14 L78 46 Q74 60 60 60 Q46 60 42 46 Z" fill="${c}"/>
+      <path d="M40 18 Q24 18 26 32 Q28 42 42 42" stroke="${c2}" stroke-width="5" fill="none"/>
+      <path d="M80 18 Q96 18 94 32 Q92 42 78 42" stroke="${c2}" stroke-width="5" fill="none"/>
+      <path d="M44 18 L47 40" stroke="#ffffff" stroke-width="4" opacity=".45" stroke-linecap="round"/>
+      <rect x="54" y="58" width="12" height="12" fill="${c2}"/>
+      <rect x="40" y="70" width="40" height="14" rx="3" fill="${c2}"/>
+      <rect x="46" y="74" width="28" height="6" rx="2" fill="${c}"/>
+      ${figuur}`, "0 0 120 90");
+
   const ART = {
     graafmachine: ({ c = "#ffb300", c2 = "#ff8f00" } = {}) => svg(`
       <rect x="10" y="66" width="62" height="16" rx="8" fill="#3a3a48"/>
@@ -235,6 +257,53 @@
       <path d="M54 34 Q48 36 46 40 Q52 39 56 37 Z" fill="${dino}"/>
       <rect x="57" y="38" width="3" height="6" rx="1" fill="${dino}"/><rect x="64" y="38" width="3" height="6" rx="1" fill="${dino}"/>
       <circle cx="78.5" cy="23.5" r="1" fill="#2b2b38"/>`, "0 0 120 90"),
+
+    // Superheld met cape en masker (eigen ontwerp).
+    heldtrofee: ({ c = "#ffc107", c2 = "#ff8f00", f = "#1e88e5", f2 = "#e53935" } = {}) => beker(c, c2, `
+      <path d="M53 29 L67 29 L73 52 Q60 47 47 52 Z" fill="${f2}"/>
+      <rect x="55" y="45" width="4" height="8" rx="2" fill="${f}"/><rect x="61" y="45" width="4" height="8" rx="2" fill="${f}"/>
+      <rect x="54" y="29" width="12" height="17" rx="4" fill="${f}"/>
+      ${star(60, 36.5, 4.2, "#ffeb3b")}
+      <path d="M65 32 L71 21" stroke="${f}" stroke-width="3.4" stroke-linecap="round"/><circle cx="71.5" cy="20" r="2.4" fill="#ffd7b5"/>
+      <path d="M55 32 L51 40" stroke="${f}" stroke-width="3.4" stroke-linecap="round"/>
+      <circle cx="60" cy="23" r="6" fill="#ffd7b5"/>
+      <path d="M54 19.5 Q60 15 66 19.5 L66 20 L54 20 Z" fill="#5d4037"/>
+      <rect x="53.5" y="20.5" width="13" height="4" rx="2" fill="${f2}"/>
+      <circle cx="57.5" cy="22.4" r="1" fill="#fff"/><circle cx="62.5" cy="22.4" r="1" fill="#fff"/>
+      <path d="M57.5 26 Q60 27.6 62.5 26" stroke="#2b2b38" stroke-width="1.1" fill="none" stroke-linecap="round"/>`),
+
+    // Lief, harig eenoog-monstertje.
+    monstertrofee: ({ c = "#ffc107", c2 = "#ff8f00", f = "#8bc34a", f2 = "#ff7043" } = {}) => beker(c, c2, `
+      <path d="M51 25 L48 15 L56 22 Z M69 25 L72 15 L64 22 Z" fill="${f2}"/>
+      <rect x="51" y="44" width="6" height="7" rx="3" fill="${f}"/><rect x="63" y="44" width="6" height="7" rx="3" fill="${f}"/>
+      <path d="M47 36 Q46 21 60 21 Q74 21 73 36 Q74 48 60 48 Q46 48 47 36 Z" fill="${f}"/>
+      <path d="M47 33 L44 31 L47 36 Z M73 33 L76 31 L73 36 Z" fill="${f}"/>
+      <circle cx="54" cy="42" r="1.6" fill="${f2}" opacity=".7"/><circle cx="67" cy="40" r="1.3" fill="${f2}" opacity=".7"/>
+      <circle cx="60" cy="31" r="6" fill="#fff"/><circle cx="61" cy="31.5" r="3" fill="#2b2b38"/><circle cx="62" cy="30.3" r="1" fill="#fff"/>
+      <path d="M54 39 Q60 45 66 39 Z" fill="#5d2a2a"/>
+      <path d="M56 39.4 L57.4 41.6 L58.6 39.4 Z M61.4 39.4 L62.6 41.6 L64 39.4 Z" fill="#fff"/>`),
+
+    // Astronautje met helm en rugzak.
+    astronauttrofee: ({ c = "#ffc107", c2 = "#ff8f00", f = "#4fc3f7", f2 = "#e53935" } = {}) => beker(c, c2, `
+      <rect x="49" y="36" width="22" height="12" rx="4" fill="#b0bec5"/>
+      <rect x="52" y="38" width="16" height="14" rx="5" fill="#f5f7fa" stroke="#b0bec5" stroke-width="1"/>
+      <rect x="57" y="42" width="6" height="4" rx="1" fill="${f2}"/>
+      <path d="M53 41 L48 46" stroke="#f5f7fa" stroke-width="4" stroke-linecap="round"/>
+      <path d="M67 41 L72 34" stroke="#f5f7fa" stroke-width="4" stroke-linecap="round"/>
+      <line x1="60" y1="17" x2="60" y2="12" stroke="#90a4ae" stroke-width="1.6"/><circle cx="60" cy="11" r="2" fill="${f2}"/>
+      <circle cx="60" cy="28" r="11" fill="#f5f7fa" stroke="#b0bec5" stroke-width="1.2"/>
+      <ellipse cx="60" cy="29" rx="7.5" ry="6" fill="${f}"/>
+      <ellipse cx="57" cy="26.5" rx="2.4" ry="1.5" fill="#fff" opacity=".75"/>`),
+
+    // Ringplaneet met sterretjes en een maantje.
+    ruimtetrofee: ({ c = "#ffc107", c2 = "#ff8f00", f = "#7e57c2", f2 = "#ff8a65" } = {}) => beker(c, c2, `
+      <ellipse cx="60" cy="35" rx="17" ry="4.5" fill="none" stroke="${f2}" stroke-width="2.6" transform="rotate(-15 60 35)"/>
+      <circle cx="60" cy="34" r="10" fill="${f}"/>
+      <path d="M53 30 Q58 27 66 29" stroke="#ffffff" stroke-width="2" opacity=".4" fill="none" stroke-linecap="round"/>
+      <circle cx="64" cy="38" r="1.8" fill="#000" opacity=".15"/><circle cx="56" cy="36" r="1.2" fill="#000" opacity=".15"/>
+      <path d="M43 35 A17 4.5 0 0 0 77 35" fill="none" stroke="${f2}" stroke-width="2.6" transform="rotate(-15 60 35)"/>
+      ${star(47, 22, 3.6, "#fffde7", c2)}${star(74, 46, 3, "#fffde7", c2)}${star(72, 21, 2.2, "#fffde7", c2)}
+      <circle cx="49" cy="47" r="3" fill="#eceff1"/><circle cx="48.2" cy="46.3" r=".8" fill="#b0bec5"/>`),
 
     potje: ({ c = "#4fc3f7" } = {}) => svg(`
       <ellipse cx="60" cy="40" rx="40" ry="12" fill="${c}"/>
