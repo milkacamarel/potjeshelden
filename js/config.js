@@ -22,9 +22,10 @@ window.APP_CONFIG = {
   // Per item: id (uniek), name, type, cost, en art (zie art.js) + opts, óf emoji.
   // type: voertuig | held | accessoire | sticker | decor
   WORLDS: [
-    // Nieuw (21 november 2026): superhelden, monsters, astronauten en heelal.
+    // Nieuw (21 november 2026): superhelden, monsters, heelal (astronauten, planeten, ufo's) en motoren.
     // Staan bewust vooraan; prijzen beginnen boven de andere werelden (die gaan tot 600)
     // en wisselen om de beurt tussen de vier werelden: elke 15 sterren iets nieuws.
+    // Motoren hebben sound (toonhoogte): tik in de garage = vroem-geluid.
     {
       id: "helden", name: "Superheldenwereld", short: "Helden", emoji: "🦸",
       color: "#e53935", bg: "linear-gradient(160deg,#e3f2fd,#ffebee)",
@@ -40,7 +41,7 @@ window.APP_CONFIG = {
       ],
     },
     {
-      id: "monsters", name: "Monsterwereld", short: "Monsters", emoji: "👾",
+      id: "monsters", name: "Monsterwereld", short: "Monster", emoji: "👾",
       color: "#8e24aa", bg: "linear-gradient(160deg,#f3e5f5,#f1f8e9)",
       items: [
         { id: "m-monster-brommel", name: "Monster Brommel", type: "held", cost: 635, art: "monster", opts: { c: "#8bc34a", c2: "#ff7043", belly: "#f1f8e9", eyes: 1 } },
@@ -54,31 +55,31 @@ window.APP_CONFIG = {
       ],
     },
     {
-      id: "astronauten", name: "Astronautenwereld", short: "Astro", emoji: "🧑‍🚀",
-      color: "#1e88e5", bg: "linear-gradient(160deg,#e3f2fd,#eceff1)",
-      items: [
-        { id: "a2-astronaut-pim", name: "Astronaut Pim", type: "held", cost: 650, art: "astronaut", opts: { visor: "#4fc3f7", patch: "#e53935", hair: "#5d4037" } },
-        { id: "a2-astronautenraket", name: "Astronautenraket", type: "voertuig", cost: 710, art: "raket", opts: { c: "#ffffff", c2: "#ff6d00", win: "#4fc3f7" } },
-        { id: "a2-telescoop", name: "Telescoop", type: "accessoire", cost: 770, emoji: "🔭" },
-        { id: "a2-astronaut-noor", name: "Astronaut Noor", type: "held", cost: 830, art: "astronaut", opts: { visor: "#ffb74d", patch: "#1e88e5", hair: "#ffca28", skin: "#ffe0bd" } },
-        { id: "a2-maanvlag", name: "Maanvlag", type: "decor", cost: 890, emoji: "🚩" },
-        { id: "a2-astronaut-jet", name: "Astronaut Jet", type: "held", cost: 950, art: "astronaut", opts: { visor: "#81c784", patch: "#8e24aa", hair: "#212121", skin: "#c68642" } },
-        { id: "a2-astronautenwagen", name: "Astronautenwagen", type: "voertuig", cost: 1010, art: "maanwagen", opts: { c: "#eceff1", c2: "#e53935" } },
-        { id: "a2-astronaut-kiki", name: "Astronaut Kiki", type: "held", cost: 1070, art: "astronaut", opts: { suit: "#fce4ec", visor: "#f48fb1", patch: "#ff6d00", hair: "#6d4c41" } },
-      ],
-    },
-    {
       id: "heelal", name: "Heelalwereld", short: "Heelal", emoji: "🪐",
       color: "#3949ab", bg: "linear-gradient(160deg,#e8eaf6,#fce4ec)",
       items: [
-        { id: "h2-planeet-paars", name: "Planeet Paars", type: "decor", cost: 665, art: "planeet", opts: { c: "#7e57c2", c2: "#b39ddb", ring: "#ffb74d" } },
-        { id: "h2-ufo-groentje", name: "Ufo Groentje", type: "voertuig", cost: 725, art: "ufo", opts: { c: "#90a4ae", c2: "#cfd8dc", alien: "#8bc34a", light: "#ffeb3b" } },
-        { id: "h2-komeet-sticker", name: "Komeet-sticker", type: "sticker", cost: 785, emoji: "☄️" },
-        { id: "h2-planeet-blauw", name: "Planeet Blauw", type: "decor", cost: 845, art: "planeet", opts: { c: "#42a5f5", c2: "#bbdefb", ring: "#ffca28" } },
-        { id: "h2-ruimtevriendje", name: "Ruimtevriendje", type: "held", cost: 905, emoji: "👽" },
-        { id: "h2-ufo-roze", name: "Ufo Roze", type: "voertuig", cost: 965, art: "ufo", opts: { c: "#f48fb1", c2: "#f8bbd0", alien: "#4dd0e1", light: "#fff59d" } },
-        { id: "h2-melkweg", name: "Melkweg", type: "decor", cost: 1025, emoji: "🌌" },
-        { id: "h2-planeet-rood", name: "Planeet Rood", type: "decor", cost: 1085, art: "planeet", opts: { c: "#ef5350", c2: "#ffcdd2", ring: "#4dd0e1" } },
+        { id: "hl-astronaut-pim", name: "Astronaut Pim", type: "held", cost: 650, art: "astronaut", opts: { visor: "#4fc3f7", patch: "#e53935", hair: "#5d4037" } },
+        { id: "hl-planeet-paars", name: "Planeet Paars", type: "decor", cost: 710, art: "planeet", opts: { c: "#7e57c2", c2: "#b39ddb", ring: "#ffb74d" } },
+        { id: "hl-ufo-groentje", name: "Ufo Groentje", type: "voertuig", cost: 770, art: "ufo", opts: { c: "#90a4ae", c2: "#cfd8dc", alien: "#8bc34a", light: "#ffeb3b" } },
+        { id: "hl-astronaut-noor", name: "Astronaut Noor", type: "held", cost: 830, art: "astronaut", opts: { visor: "#ffb74d", patch: "#1e88e5", hair: "#ffca28", skin: "#ffe0bd" } },
+        { id: "hl-komeet-sticker", name: "Komeet-sticker", type: "sticker", cost: 890, emoji: "☄️" },
+        { id: "hl-planeet-blauw", name: "Planeet Blauw", type: "decor", cost: 950, art: "planeet", opts: { c: "#42a5f5", c2: "#bbdefb", ring: "#ffca28" } },
+        { id: "hl-astronaut-kiki", name: "Astronaut Kiki", type: "held", cost: 1010, art: "astronaut", opts: { suit: "#fce4ec", visor: "#f48fb1", patch: "#ff6d00", hair: "#6d4c41", skin: "#c68642" } },
+        { id: "hl-ufo-roze", name: "Ufo Roze", type: "voertuig", cost: 1070, art: "ufo", opts: { c: "#f48fb1", c2: "#f8bbd0", alien: "#4dd0e1", light: "#fff59d" } },
+      ],
+    },
+    {
+      id: "motoren", name: "Motorwereld", short: "Motoren", emoji: "🏍️",
+      color: "#ff6d00", bg: "linear-gradient(160deg,#fff3e0,#eceff1)",
+      items: [
+        { id: "mo-rode-racemotor", name: "Rode racemotor", type: "voertuig", cost: 665, art: "motor", sound: 1.1, opts: { c: "#e53935", c2: "#212121", helmet: "#ffca28" } },
+        { id: "mo-blauwe-crossmotor", name: "Blauwe crossmotor", type: "voertuig", cost: 725, art: "motor", sound: 1.25, opts: { c: "#1e88e5", c2: "#ffca28", helmet: "#e53935" } },
+        { id: "mo-vroem-sticker", name: "Vroem-sticker", type: "sticker", cost: 785, emoji: "💨" },
+        { id: "mo-groene-snelle-motor", name: "Groene snelle motor", type: "voertuig", cost: 845, art: "motor", sound: 1.45, opts: { c: "#43a047", c2: "#212121", helmet: "#4fc3f7", skin: "#c68642" } },
+        { id: "mo-grote-zware-motor", name: "Grote zware motor", type: "voertuig", cost: 905, art: "motor", sound: 0.7, opts: { c: "#212121", c2: "#ff6d00", helmet: "#8e24aa" } },
+        { id: "mo-motorbrug", name: "Motorbrug", type: "decor", cost: 965, emoji: "🌉" },
+        { id: "mo-roze-motor", name: "Roze motor", type: "voertuig", cost: 1025, art: "motor", sound: 1.3, opts: { c: "#ec407a", c2: "#5e35b1", helmet: "#ffffff", skin: "#ffe0bd" } },
+        { id: "mo-gouden-motor", name: "Gouden motor", type: "voertuig", cost: 1085, art: "motor", sound: 0.9, opts: { c: "#ffb300", c2: "#3e2723", helmet: "#e53935" } },
       ],
     },
     {
