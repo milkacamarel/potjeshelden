@@ -22,6 +22,66 @@ window.APP_CONFIG = {
   // Per item: id (uniek), name, type, cost, en art (zie art.js) + opts, óf emoji.
   // type: voertuig | held | accessoire | sticker | decor
   WORLDS: [
+    // Nieuw (21 november 2026): superhelden, monsters, heelal (astronauten, planeten, ufo's) en motoren.
+    // Staan bewust vooraan; prijzen beginnen boven de andere werelden (die gaan tot 600)
+    // en wisselen om de beurt tussen de vier werelden: elke 15 sterren iets nieuws.
+    // Motoren hebben sound (toonhoogte): tik in de garage = vroem-geluid.
+    {
+      id: "helden", name: "Superheldenwereld", short: "Helden", emoji: "🦸",
+      color: "#e53935", bg: "linear-gradient(160deg,#e3f2fd,#ffebee)",
+      items: [
+        { id: "h-superheld-bliksem", name: "Superheld Bliksem", type: "held", cost: 620, art: "superheld", opts: { suit: "#1e88e5", cape: "#e53935", mask: "#e53935", hair: "#5d4037" } },
+        { id: "h-superheld-zoem", name: "Superheld Zoem", type: "held", cost: 680, art: "superheld", opts: { suit: "#43a047", cape: "#ffb300", mask: "#ffb300", hair: "#212121", emblem: "#ff7043" } },
+        { id: "h-heldenschild", name: "Heldenschild", type: "accessoire", cost: 740, emoji: "🛡️" },
+        { id: "h-superheld-sterre", name: "Superheld Sterre", type: "held", cost: 800, art: "superheld", opts: { suit: "#8e24aa", cape: "#ec407a", mask: "#ec407a", hair: "#ffca28", skin: "#ffe0bd" } },
+        { id: "h-boem-sticker", name: "Boem-sticker", type: "sticker", cost: 860, emoji: "💥" },
+        { id: "h-superheld-kracht", name: "Superheld Kracht", type: "held", cost: 920, art: "superheld", opts: { suit: "#e53935", cape: "#1e88e5", mask: "#1e88e5", hair: "#6d4c41", skin: "#c68642" } },
+        { id: "h-heldenstad", name: "Heldenstad", type: "decor", cost: 980, emoji: "🏙️" },
+        { id: "h-gouden-superheld", name: "Gouden superheld", type: "held", cost: 1040, art: "superheld", opts: { suit: "#ffb300", cape: "#6a1b9a", mask: "#6a1b9a", hair: "#3e2723", emblem: "#ffffff" } },
+      ],
+    },
+    {
+      id: "monsters", name: "Monsterwereld", short: "Monster", emoji: "👾",
+      color: "#8e24aa", bg: "linear-gradient(160deg,#f3e5f5,#f1f8e9)",
+      items: [
+        { id: "m-monster-brommel", name: "Monster Brommel", type: "held", cost: 635, art: "monster", opts: { c: "#8bc34a", c2: "#ff7043", belly: "#f1f8e9", eyes: 1 } },
+        { id: "m-monster-knuffel", name: "Monster Knuffel", type: "held", cost: 695, art: "monster", opts: { c: "#4fc3f7", c2: "#ab47bc", belly: "#e1f5fe", eyes: 2 } },
+        { id: "m-regenboog-sticker", name: "Regenboog-sticker", type: "sticker", cost: 755, emoji: "🌈" },
+        { id: "m-monster-wiebel", name: "Monster Wiebel", type: "held", cost: 815, art: "monster", opts: { c: "#ff8a65", c2: "#7e57c2", belly: "#fbe9e7", eyes: 3 } },
+        { id: "m-monstersokken", name: "Monstersokken", type: "accessoire", cost: 875, emoji: "🧦" },
+        { id: "m-monster-plof", name: "Monster Plof", type: "held", cost: 935, art: "monster", opts: { c: "#ba68c8", c2: "#66bb6a", belly: "#f3e5f5", eyes: 1 } },
+        { id: "m-monsterkasteel", name: "Monsterkasteel", type: "decor", cost: 995, emoji: "🏰" },
+        { id: "m-monster-gobbel", name: "Monster Gobbel", type: "held", cost: 1055, art: "monster", opts: { c: "#ffd54f", c2: "#26a69a", belly: "#fffde7", eyes: 2 } },
+      ],
+    },
+    {
+      id: "heelal", name: "Heelalwereld", short: "Heelal", emoji: "🪐",
+      color: "#3949ab", bg: "linear-gradient(160deg,#e8eaf6,#fce4ec)",
+      items: [
+        { id: "hl-astronaut-pim", name: "Astronaut Pim", type: "held", cost: 650, art: "astronaut", opts: { visor: "#4fc3f7", patch: "#e53935", hair: "#5d4037" } },
+        { id: "hl-planeet-paars", name: "Planeet Paars", type: "decor", cost: 710, art: "planeet", opts: { c: "#7e57c2", c2: "#b39ddb", ring: "#ffb74d" } },
+        { id: "hl-ufo-groentje", name: "Ufo Groentje", type: "voertuig", cost: 770, art: "ufo", opts: { c: "#90a4ae", c2: "#cfd8dc", alien: "#8bc34a", light: "#ffeb3b" } },
+        { id: "hl-astronaut-noor", name: "Astronaut Noor", type: "held", cost: 830, art: "astronaut", opts: { visor: "#ffb74d", patch: "#1e88e5", hair: "#ffca28", skin: "#ffe0bd" } },
+        { id: "hl-komeet-sticker", name: "Komeet-sticker", type: "sticker", cost: 890, emoji: "☄️" },
+        { id: "hl-planeet-blauw", name: "Planeet Blauw", type: "decor", cost: 950, art: "planeet", opts: { c: "#42a5f5", c2: "#bbdefb", ring: "#ffca28" } },
+        { id: "hl-astronaut-kiki", name: "Astronaut Kiki", type: "held", cost: 1010, art: "astronaut", opts: { suit: "#fce4ec", visor: "#f48fb1", patch: "#ff6d00", hair: "#6d4c41", skin: "#c68642" } },
+        { id: "hl-ufo-roze", name: "Ufo Roze", type: "voertuig", cost: 1070, art: "ufo", opts: { c: "#f48fb1", c2: "#f8bbd0", alien: "#4dd0e1", light: "#fff59d" } },
+      ],
+    },
+    {
+      id: "motoren", name: "Motorwereld", short: "Motoren", emoji: "🏍️",
+      color: "#ff6d00", bg: "linear-gradient(160deg,#fff3e0,#eceff1)",
+      items: [
+        { id: "mo-rode-racemotor", name: "Rode racemotor", type: "voertuig", cost: 665, art: "motor", sound: 1.1, opts: { c: "#e53935", c2: "#212121", helmet: "#ffca28" } },
+        { id: "mo-blauwe-crossmotor", name: "Blauwe crossmotor", type: "voertuig", cost: 725, art: "motor", sound: 1.25, opts: { c: "#1e88e5", c2: "#ffca28", helmet: "#e53935" } },
+        { id: "mo-vroem-sticker", name: "Vroem-sticker", type: "sticker", cost: 785, emoji: "💨" },
+        { id: "mo-groene-snelle-motor", name: "Groene snelle motor", type: "voertuig", cost: 845, art: "motor", sound: 1.45, opts: { c: "#43a047", c2: "#212121", helmet: "#4fc3f7", skin: "#c68642" } },
+        { id: "mo-grote-zware-motor", name: "Grote zware motor", type: "voertuig", cost: 905, art: "motor", sound: 0.7, opts: { c: "#212121", c2: "#ff6d00", helmet: "#8e24aa" } },
+        { id: "mo-motorbrug", name: "Motorbrug", type: "decor", cost: 965, emoji: "🌉" },
+        { id: "mo-roze-motor", name: "Roze motor", type: "voertuig", cost: 1025, art: "motor", sound: 1.3, opts: { c: "#ec407a", c2: "#5e35b1", helmet: "#ffffff", skin: "#ffe0bd" } },
+        { id: "mo-gouden-motor", name: "Gouden motor", type: "voertuig", cost: 1085, art: "motor", sound: 0.9, opts: { c: "#ffb300", c2: "#3e2723", helmet: "#e53935" } },
+      ],
+    },
     {
       id: "redding", name: "Reddingswereld", short: "Redding", emoji: "🚒",
       color: "#e53935", bg: "linear-gradient(160deg,#ffebee,#e3f2fd)",

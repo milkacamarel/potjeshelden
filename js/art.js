@@ -10,6 +10,17 @@
   const svg = (body, vb = "0 0 120 90") =>
     `<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${body}</svg>`;
 
+
+  // Ster-vorm (voor de ruimte- en heldentrofee).
+  const star = (cx, cy, r, fill, stroke) => {
+    const pts = [];
+    for (let i = 0; i < 10; i++) {
+      const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r;
+      pts.push(`${(cx + rr * Math.cos(a)).toFixed(1)},${(cy + rr * Math.sin(a)).toFixed(1)}`);
+    }
+    return `<polygon points="${pts.join(" ")}" fill="${fill}"${stroke ? ` stroke="${stroke}" stroke-width=".9" stroke-linejoin="round"` : ""}/>`;
+  };
+
   const ART = {
     graafmachine: ({ c = "#ffb300", c2 = "#ff8f00" } = {}) => svg(`
       <rect x="10" y="66" width="62" height="16" rx="8" fill="#3a3a48"/>
@@ -235,6 +246,110 @@
       <path d="M54 34 Q48 36 46 40 Q52 39 56 37 Z" fill="${dino}"/>
       <rect x="57" y="38" width="3" height="6" rx="1" fill="${dino}"/><rect x="64" y="38" width="3" height="6" rx="1" fill="${dino}"/>
       <circle cx="78.5" cy="23.5" r="1" fill="#2b2b38"/>`, "0 0 120 90"),
+
+    // Motor met rijdertje en vroem-streepjes (maakt geluid in de garage).
+    motor: ({ c = "#e53935", c2 = "#212121", helmet = "#ffca28", skin = "#f6d2b5" } = {}) => svg(`
+      <path d="M104 30 L116 30 M106 38 L118 38 M104 46 L114 46" stroke="#b0bec5" stroke-width="3" stroke-linecap="round"/>
+      <path d="M62 64 Q82 66 106 58" stroke="#b0bec5" stroke-width="5" fill="none" stroke-linecap="round"/>
+      ${wheel(26, 68, 15)}${wheel(92, 68, 15)}
+      <path d="M26 68 L40 38" stroke="#90a4ae" stroke-width="5" stroke-linecap="round"/>
+      <path d="M11 62 Q26 46 41 60" stroke="${c}" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M44 54 L56 64 L78 64 L92 68" stroke="#546e7a" stroke-width="4" fill="none" stroke-linejoin="round"/>
+      <rect x="52" y="50" width="22" height="13" rx="3" fill="#78909c"/>
+      <path d="M44 46 Q46 34 62 34 L74 38 L74 50 L46 52 Z" fill="${c}"/>
+      <path d="M50 44 L70 42" stroke="${c2}" stroke-width="3" stroke-linecap="round"/>
+      <path d="M72 40 Q82 36 94 40 L92 47 L74 48 Z" fill="${c2}"/>
+      <path d="M92 42 L106 44 L102 52 L88 50 Z" fill="${c}"/>
+      <circle cx="35" cy="42" r="5" fill="#fff59d" stroke="#90a4ae" stroke-width="2"/>
+      <path d="M66 40 Q62 26 72 24 Q82 26 82 40 Z" fill="${c2}"/>
+      <path d="M68 30 L44 36" stroke="${c2}" stroke-width="5" stroke-linecap="round"/><circle cx="43" cy="36" r="3" fill="${c2}"/>
+      <circle cx="72" cy="15" r="11" fill="${helmet}"/>
+      <path d="M61 12 Q67 9 72 12 L72 21 Q66 23 61 20 Z" fill="${skin}"/>
+      <circle cx="64.5" cy="15" r="1.4" fill="#2b2b38"/><circle cx="69" cy="15" r="1.4" fill="#2b2b38"/>
+      <path d="M64 18.5 Q66.5 20 69 18.5" stroke="#2b2b38" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+      <path d="M62 8 Q72 0 82 10" stroke="#ffffff" stroke-width="2.4" opacity=".6" fill="none" stroke-linecap="round"/>`, "0 0 120 90"),
+
+    // Superheld met cape en masker (eigen ontwerp, borstbeeld zoals de andere helden).
+    superheld: ({ suit = "#1e88e5", cape = "#e53935", mask = "#e53935", hair = "#5d4037", skin = "#f6d2b5", emblem = "#ffeb3b" } = {}) => svg(`
+      <path d="M20 94 Q24 62 44 60 L76 60 Q96 62 100 94 Z" fill="${cape}"/>
+      <path d="M32 94 Q32 66 60 64 Q88 66 88 94 Z" fill="${suit}"/>
+      <path d="M40 64 L52 64 L46 76 Z M68 64 L80 64 L74 76 Z" fill="${cape}"/>
+      <circle cx="60" cy="81" r="10" fill="#ffffff" opacity=".9"/>
+      ${star(60, 81.5, 8, emblem, "#00000030")}
+      <rect x="54" y="54" width="12" height="12" rx="4" fill="${skin}"/>
+      <circle cx="60" cy="40" r="20" fill="${skin}"/>
+      <path d="M40 38 Q38 16 60 16 Q82 16 80 38 Q74 25 60 25 Q46 25 40 38 Z" fill="${hair}"/>
+      <path d="M57 17 Q60 6 70 9 Q62 12 63 18 Z" fill="${hair}"/>
+      <path d="M37 35 Q60 29 83 35 L83 46 Q60 40 37 46 Z" fill="${mask}"/>
+      <ellipse cx="51" cy="40.5" rx="5" ry="4" fill="#fff"/><ellipse cx="69" cy="40.5" rx="5" ry="4" fill="#fff"/>
+      <circle cx="51.5" cy="41" r="2.4" fill="#2b2b38"/><circle cx="69.5" cy="41" r="2.4" fill="#2b2b38"/>
+      <circle cx="46" cy="50" r="3" fill="#ff8a80" opacity=".5"/><circle cx="74" cy="50" r="3" fill="#ff8a80" opacity=".5"/>
+      <path d="M52 51 Q60 58 68 51" stroke="#2b2b38" stroke-width="2" fill="none" stroke-linecap="round"/>`, "0 0 120 95"),
+
+    // Lief, harig monstertje met 1, 2 of 3 ogen.
+    monster: ({ c = "#8bc34a", c2 = "#ff7043", belly = "#f1f8e9", eyes = 1 } = {}) => {
+      const eye = (x, y, r) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff"/><circle cx="${x + r * 0.15}" cy="${y + r * 0.15}" r="${r * 0.48}" fill="#2b2b38"/><circle cx="${x + r * 0.35}" cy="${y - r * 0.15}" r="${r * 0.18}" fill="#fff"/>`;
+      const ogen = eyes === 3 ? eye(45, 44, 6.5) + eye(60, 34, 7.5) + eye(75, 44, 6.5)
+        : eyes === 2 ? eye(49, 40, 8) + eye(71, 40, 8) : eye(60, 40, 11);
+      return svg(`
+      <ellipse cx="46" cy="88" rx="10" ry="5" fill="${c2}"/><ellipse cx="74" cy="88" rx="10" ry="5" fill="${c2}"/>
+      <path d="M42 28 L35 6 L53 21 Z M78 28 L85 6 L67 21 Z" fill="${c2}"/>
+      <path d="M31 58 Q16 54 17 40" stroke="${c}" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M89 58 Q104 54 103 40" stroke="${c}" stroke-width="9" fill="none" stroke-linecap="round"/>
+      <path d="M28 56 Q26 18 60 18 Q94 18 92 56 Q92 90 60 90 Q28 90 28 56 Z" fill="${c}"/>
+      <path d="M46 21 L50 11 L55 19 L60 8 L65 19 L70 11 L74 21 Z" fill="${c}"/>
+      <path d="M28 50 L22 47 L28 56 Z M92 50 L98 47 L92 56 Z" fill="${c}"/>
+      <ellipse cx="60" cy="72" rx="18" ry="14" fill="${belly}"/>
+      <circle cx="37" cy="70" r="3" fill="${c2}" opacity=".45"/><circle cx="83" cy="66" r="2.5" fill="${c2}" opacity=".45"/><circle cx="80" cy="76" r="1.8" fill="${c2}" opacity=".45"/>
+      ${ogen}
+      <path d="M47 56 Q60 67 73 56 Z" fill="#5d2a2a"/>
+      <path d="M51 56.6 L53.6 61 L56.2 56.6 Z M63.8 56.6 L66.4 61 L69 56.6 Z" fill="#fff"/>`, "0 0 120 95");
+    },
+
+    // Astronaut met grote helm (borstbeeld).
+    astronaut: ({ suit = "#f5f7fa", visor = "#4fc3f7", patch = "#e53935", skin = "#f6d2b5", hair = "#5d4037" } = {}) => svg(`
+      <path d="M26 94 Q26 64 60 62 Q94 64 94 94 Z" fill="${suit}" stroke="#cfd8dc" stroke-width="1.5"/>
+      <rect x="49" y="72" width="22" height="14" rx="3" fill="#cfd8dc"/>
+      <circle cx="54" cy="79" r="2.4" fill="${patch}"/><circle cx="60" cy="79" r="2.4" fill="#66bb6a"/><circle cx="66" cy="79" r="2.4" fill="#ffca28"/>
+      <circle cx="37" cy="77" r="6" fill="${patch}"/>${star(37, 77, 3.6, "#fff")}
+      <rect x="27" y="31" width="7" height="16" rx="3" fill="${patch}"/><rect x="86" y="31" width="7" height="16" rx="3" fill="${patch}"/>
+      <circle cx="60" cy="39" r="28" fill="${suit}" stroke="#b0bec5" stroke-width="2"/>
+      <ellipse cx="60" cy="41" rx="20" ry="17" fill="#1a2340"/>
+      <circle cx="60" cy="44" r="13" fill="${skin}"/>
+      <path d="M47 41 Q48 30 60 30 Q72 30 73 41 Q67 35 60 35 Q53 35 47 41 Z" fill="${hair}"/>
+      <circle cx="55" cy="44" r="2.4" fill="#2b2b38"/><circle cx="65" cy="44" r="2.4" fill="#2b2b38"/>
+      <path d="M55 50 Q60 54 65 50" stroke="#2b2b38" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <ellipse cx="60" cy="41" rx="20" ry="17" fill="${visor}" opacity=".14"/>
+      <path d="M46 32 Q52 26 60 26" stroke="#fff" stroke-width="3" opacity=".75" fill="none" stroke-linecap="round"/>`, "0 0 120 95"),
+
+    // Vrolijke planeet met ring en gezichtje.
+    planeet: ({ c = "#7e57c2", c2 = "#b39ddb", ring = "#ffb74d" } = {}) => svg(`
+      ${star(14, 16, 4, "#ffeb3b")}${star(104, 14, 3, "#ffeb3b")}${star(100, 82, 3.5, "#ffeb3b")}
+      <ellipse cx="60" cy="50" rx="46" ry="11" fill="none" stroke="${ring}" stroke-width="6" transform="rotate(-12 60 50)"/>
+      <circle cx="60" cy="46" r="28" fill="${c}"/>
+      <path d="M35 36 Q60 30 85 36" stroke="${c2}" stroke-width="5" fill="none" opacity=".7"/>
+      <path d="M33 58 Q60 64 87 58" stroke="${c2}" stroke-width="4" fill="none" opacity=".7"/>
+      <circle cx="73" cy="30" r="3" fill="#00000020"/><circle cx="44" cy="62" r="2.2" fill="#00000020"/>
+      <circle cx="51" cy="46" r="3.6" fill="#2b2b38"/><circle cx="69" cy="46" r="3.6" fill="#2b2b38"/>
+      <circle cx="52" cy="45" r="1.2" fill="#fff"/><circle cx="70" cy="45" r="1.2" fill="#fff"/>
+      <circle cx="45" cy="53" r="3" fill="#ff8a80" opacity=".55"/><circle cx="75" cy="53" r="3" fill="#ff8a80" opacity=".55"/>
+      <path d="M54 54 Q60 60 66 54" stroke="#2b2b38" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M14 50 A46 11 0 0 0 106 50" fill="none" stroke="${ring}" stroke-width="6" transform="rotate(-12 60 50)"/>`, "0 0 120 95"),
+
+    // Vriendelijke vliegende schotel met ruimtevriendje.
+    ufo: ({ c = "#90a4ae", c2 = "#cfd8dc", alien = "#8bc34a", light = "#ffeb3b" } = {}) => svg(`
+      <path d="M44 62 L28 94 L92 94 L76 62 Z" fill="${light}" opacity=".28"/>
+      <line x1="54" y1="26" x2="50" y2="14" stroke="${alien}" stroke-width="2.4"/><circle cx="50" cy="13" r="3" fill="${alien}"/>
+      <line x1="66" y1="26" x2="70" y2="14" stroke="${alien}" stroke-width="2.4"/><circle cx="70" cy="13" r="3" fill="${alien}"/>
+      <circle cx="60" cy="38" r="13" fill="${alien}"/>
+      <ellipse cx="55" cy="36" rx="3.4" ry="4.4" fill="#2b2b38"/><ellipse cx="65" cy="36" rx="3.4" ry="4.4" fill="#2b2b38"/>
+      <circle cx="56" cy="34.6" r="1.2" fill="#fff"/><circle cx="66" cy="34.6" r="1.2" fill="#fff"/>
+      <path d="M55 43 Q60 47 65 43" stroke="#2b2b38" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+      <path d="M36 48 Q36 18 60 18 Q84 18 84 48 Z" fill="#e0f7fa" opacity=".45" stroke="#b2ebf2" stroke-width="2"/>
+      <ellipse cx="60" cy="62" rx="22" ry="6" fill="#607d8b"/>
+      <ellipse cx="60" cy="54" rx="48" ry="12" fill="${c}"/>
+      <ellipse cx="60" cy="49" rx="30" ry="5" fill="${c2}"/>
+      ${[24, 42, 60, 78, 96].map(x => `<circle cx="${x}" cy="${x === 60 ? 60 : x === 42 || x === 78 ? 58.5 : 55}" r="3.4" fill="${light}"/>`).join("")}`, "0 0 120 95"),
 
     potje: ({ c = "#4fc3f7" } = {}) => svg(`
       <ellipse cx="60" cy="40" rx="40" ry="12" fill="${c}"/>

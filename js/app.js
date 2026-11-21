@@ -101,7 +101,35 @@
     star: () => tones([523, 659, 784, 1047]),
     unlock: () => tones([392, 523, 659, 784, 1047, 1319], 0.11),
     soft: () => tones([523, 784], 0.1),
+    motor: (p = 1) => engine(p),
   };
+
+  // Motorgeluid: vroem-vroem! p = toonhoogte (0.7 = grote zware motor, 1.4 = snelle kleine).
+  function engine(p = 1) {
+    if (!S.state.settings.sound) return;
+    try {
+      const ac = Voice.audioCtx(), t = ac.currentTime, f = 55 * p;
+      const o = ac.createOscillator(), sub = ac.createOscillator();
+      const flt = ac.createBiquadFilter(), amp = ac.createGain();
+      const lfo = ac.createOscillator(), depth = ac.createGain(), out = ac.createGain();
+      o.type = "sawtooth"; sub.type = "square"; flt.type = "lowpass"; flt.frequency.value = 700 * p;
+      lfo.type = "square"; depth.gain.value = 0.5; amp.gain.value = 0.5;
+      [[o, 1], [sub, 0.5], [lfo, 0.45]].forEach(([n, m]) => {
+        n.frequency.setValueAtTime(f * m, t);
+        n.frequency.exponentialRampToValueAtTime(f * m * 2.6, t + 0.55);
+        n.frequency.exponentialRampToValueAtTime(f * m * 1.6, t + 0.85);
+        n.frequency.exponentialRampToValueAtTime(f * m * 3.0, t + 1.3);
+        n.frequency.exponentialRampToValueAtTime(f * m * 1.2, t + 1.9);
+      });
+      lfo.connect(depth).connect(amp.gain);
+      o.connect(flt); sub.connect(flt); flt.connect(amp).connect(out).connect(ac.destination);
+      out.gain.setValueAtTime(0.0001, t);
+      out.gain.exponentialRampToValueAtTime(0.35, t + 0.08);
+      out.gain.setValueAtTime(0.35, t + 1.6);
+      out.gain.exponentialRampToValueAtTime(0.0001, t + 2.0);
+      [o, sub, lfo].forEach(n => { n.start(t); n.stop(t + 2.05); });
+    } catch (e) { /* geen geluid beschikbaar */ }
+  }
 
   // Speelt een ingesproken zin van papa/mama. Zonder opname blijft het stil (alleen de geluidjes).
   function speak(ids, delay = 0.5) {
@@ -395,7 +423,7 @@
     $$("[data-item]", el).forEach(b => b.addEventListener("click", () => {
       const item = allItems().find(i => i.id === b.dataset.item);
       b.classList.remove("wiggle"); void b.offsetWidth; b.classList.add("wiggle");
-      if (isUnlocked(item)) sfx.star();
+      if (isUnlocked(item)) item.sound ? sfx.motor(item.sound) : sfx.star();
       else { sfx.soft(); speak("op-slot", 0.2); }
     }));
 
