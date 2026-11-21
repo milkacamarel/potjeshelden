@@ -22,29 +22,63 @@ window.APP_CONFIG = {
   // Per item: id (uniek), name, type, cost, en art (zie art.js) + opts, óf emoji.
   // type: voertuig | held | accessoire | sticker | decor
   WORLDS: [
+    // Nieuw (21 november 2026): superhelden, monsters, astronauten en heelal.
+    // Staan bewust vooraan; prijzen beginnen boven de andere werelden (die gaan tot 600)
+    // en wisselen om de beurt tussen de vier werelden: elke 15 sterren iets nieuws.
     {
-      id: "trofee", name: "Trofeeënkast", short: "Trofee", emoji: "🏆",
-      color: "#f9a825", bg: "linear-gradient(160deg,#fffde7,#e8eaf6)",
-      // Superhelden, monsters, astronauten en ruimte: brons, zilver, goud en diamant.
-      // Staat bewust als eerste: deze wereld opent als eerste in de garage.
-      // Prijzen beginnen boven de andere werelden (die gaan tot 600).
+      id: "helden", name: "Superheldenwereld", short: "Helden", emoji: "🦸",
+      color: "#e53935", bg: "linear-gradient(160deg,#e3f2fd,#ffebee)",
       items: [
-        { id: "t-held-brons", name: "Bronzen heldentrofee", type: "trofee", cost: 620, art: "heldtrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#1e88e5", f2: "#e53935" } },
-        { id: "t-monster-brons", name: "Bronzen monstertrofee", type: "trofee", cost: 645, art: "monstertrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#8bc34a", f2: "#ff7043" } },
-        { id: "t-astro-brons", name: "Bronzen astronautentrofee", type: "trofee", cost: 670, art: "astronauttrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#4fc3f7", f2: "#e53935" } },
-        { id: "t-ruimte-brons", name: "Bronzen ruimtetrofee", type: "trofee", cost: 695, art: "ruimtetrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#7e57c2", f2: "#ff8a65" } },
-        { id: "t-held-zilver", name: "Zilveren heldentrofee", type: "trofee", cost: 720, art: "heldtrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#43a047", f2: "#ffb300" } },
-        { id: "t-monster-zilver", name: "Zilveren monstertrofee", type: "trofee", cost: 745, art: "monstertrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#4fc3f7", f2: "#ab47bc" } },
-        { id: "t-astro-zilver", name: "Zilveren astronautentrofee", type: "trofee", cost: 770, art: "astronauttrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#ffb74d", f2: "#1e88e5" } },
-        { id: "t-ruimte-zilver", name: "Zilveren ruimtetrofee", type: "trofee", cost: 795, art: "ruimtetrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#42a5f5", f2: "#ffca28" } },
-        { id: "t-held-goud", name: "Gouden heldentrofee", type: "trofee", cost: 820, art: "heldtrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#7e57c2", f2: "#ec407a" } },
-        { id: "t-monster-goud", name: "Gouden monstertrofee", type: "trofee", cost: 845, art: "monstertrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#ff8a65", f2: "#7e57c2" } },
-        { id: "t-astro-goud", name: "Gouden astronautentrofee", type: "trofee", cost: 870, art: "astronauttrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#81c784", f2: "#8e24aa" } },
-        { id: "t-ruimte-goud", name: "Gouden ruimtetrofee", type: "trofee", cost: 895, art: "ruimtetrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#ef5350", f2: "#4dd0e1" } },
-        { id: "t-held-diamant", name: "Diamanten heldentrofee", type: "trofee", cost: 920, art: "heldtrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#e53935", f2: "#1e88e5" } },
-        { id: "t-monster-diamant", name: "Diamanten monstertrofee", type: "trofee", cost: 945, art: "monstertrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#ba68c8", f2: "#66bb6a" } },
-        { id: "t-astro-diamant", name: "Diamanten astronautentrofee", type: "trofee", cost: 970, art: "astronauttrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#f48fb1", f2: "#ff6d00" } },
-        { id: "t-ruimte-diamant", name: "Diamanten ruimtetrofee", type: "trofee", cost: 995, art: "ruimtetrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#26a69a", f2: "#f06292" } },
+        { id: "h-superheld-bliksem", name: "Superheld Bliksem", type: "held", cost: 620, art: "superheld", opts: { suit: "#1e88e5", cape: "#e53935", mask: "#e53935", hair: "#5d4037" } },
+        { id: "h-superheld-zoem", name: "Superheld Zoem", type: "held", cost: 680, art: "superheld", opts: { suit: "#43a047", cape: "#ffb300", mask: "#ffb300", hair: "#212121", emblem: "#ff7043" } },
+        { id: "h-heldenschild", name: "Heldenschild", type: "accessoire", cost: 740, emoji: "🛡️" },
+        { id: "h-superheld-sterre", name: "Superheld Sterre", type: "held", cost: 800, art: "superheld", opts: { suit: "#8e24aa", cape: "#ec407a", mask: "#ec407a", hair: "#ffca28", skin: "#ffe0bd" } },
+        { id: "h-boem-sticker", name: "Boem-sticker", type: "sticker", cost: 860, emoji: "💥" },
+        { id: "h-superheld-kracht", name: "Superheld Kracht", type: "held", cost: 920, art: "superheld", opts: { suit: "#e53935", cape: "#1e88e5", mask: "#1e88e5", hair: "#6d4c41", skin: "#c68642" } },
+        { id: "h-heldenstad", name: "Heldenstad", type: "decor", cost: 980, emoji: "🏙️" },
+        { id: "h-gouden-superheld", name: "Gouden superheld", type: "held", cost: 1040, art: "superheld", opts: { suit: "#ffb300", cape: "#6a1b9a", mask: "#6a1b9a", hair: "#3e2723", emblem: "#ffffff" } },
+      ],
+    },
+    {
+      id: "monsters", name: "Monsterwereld", short: "Monsters", emoji: "👾",
+      color: "#8e24aa", bg: "linear-gradient(160deg,#f3e5f5,#f1f8e9)",
+      items: [
+        { id: "m-monster-brommel", name: "Monster Brommel", type: "held", cost: 635, art: "monster", opts: { c: "#8bc34a", c2: "#ff7043", belly: "#f1f8e9", eyes: 1 } },
+        { id: "m-monster-knuffel", name: "Monster Knuffel", type: "held", cost: 695, art: "monster", opts: { c: "#4fc3f7", c2: "#ab47bc", belly: "#e1f5fe", eyes: 2 } },
+        { id: "m-regenboog-sticker", name: "Regenboog-sticker", type: "sticker", cost: 755, emoji: "🌈" },
+        { id: "m-monster-wiebel", name: "Monster Wiebel", type: "held", cost: 815, art: "monster", opts: { c: "#ff8a65", c2: "#7e57c2", belly: "#fbe9e7", eyes: 3 } },
+        { id: "m-monstersokken", name: "Monstersokken", type: "accessoire", cost: 875, emoji: "🧦" },
+        { id: "m-monster-plof", name: "Monster Plof", type: "held", cost: 935, art: "monster", opts: { c: "#ba68c8", c2: "#66bb6a", belly: "#f3e5f5", eyes: 1 } },
+        { id: "m-monsterkasteel", name: "Monsterkasteel", type: "decor", cost: 995, emoji: "🏰" },
+        { id: "m-monster-gobbel", name: "Monster Gobbel", type: "held", cost: 1055, art: "monster", opts: { c: "#ffd54f", c2: "#26a69a", belly: "#fffde7", eyes: 2 } },
+      ],
+    },
+    {
+      id: "astronauten", name: "Astronautenwereld", short: "Astro", emoji: "🧑‍🚀",
+      color: "#1e88e5", bg: "linear-gradient(160deg,#e3f2fd,#eceff1)",
+      items: [
+        { id: "a2-astronaut-pim", name: "Astronaut Pim", type: "held", cost: 650, art: "astronaut", opts: { visor: "#4fc3f7", patch: "#e53935", hair: "#5d4037" } },
+        { id: "a2-astronautenraket", name: "Astronautenraket", type: "voertuig", cost: 710, art: "raket", opts: { c: "#ffffff", c2: "#ff6d00", win: "#4fc3f7" } },
+        { id: "a2-telescoop", name: "Telescoop", type: "accessoire", cost: 770, emoji: "🔭" },
+        { id: "a2-astronaut-noor", name: "Astronaut Noor", type: "held", cost: 830, art: "astronaut", opts: { visor: "#ffb74d", patch: "#1e88e5", hair: "#ffca28", skin: "#ffe0bd" } },
+        { id: "a2-maanvlag", name: "Maanvlag", type: "decor", cost: 890, emoji: "🚩" },
+        { id: "a2-astronaut-jet", name: "Astronaut Jet", type: "held", cost: 950, art: "astronaut", opts: { visor: "#81c784", patch: "#8e24aa", hair: "#212121", skin: "#c68642" } },
+        { id: "a2-astronautenwagen", name: "Astronautenwagen", type: "voertuig", cost: 1010, art: "maanwagen", opts: { c: "#eceff1", c2: "#e53935" } },
+        { id: "a2-astronaut-kiki", name: "Astronaut Kiki", type: "held", cost: 1070, art: "astronaut", opts: { suit: "#fce4ec", visor: "#f48fb1", patch: "#ff6d00", hair: "#6d4c41" } },
+      ],
+    },
+    {
+      id: "heelal", name: "Heelalwereld", short: "Heelal", emoji: "🪐",
+      color: "#3949ab", bg: "linear-gradient(160deg,#e8eaf6,#fce4ec)",
+      items: [
+        { id: "h2-planeet-paars", name: "Planeet Paars", type: "decor", cost: 665, art: "planeet", opts: { c: "#7e57c2", c2: "#b39ddb", ring: "#ffb74d" } },
+        { id: "h2-ufo-groentje", name: "Ufo Groentje", type: "voertuig", cost: 725, art: "ufo", opts: { c: "#90a4ae", c2: "#cfd8dc", alien: "#8bc34a", light: "#ffeb3b" } },
+        { id: "h2-komeet-sticker", name: "Komeet-sticker", type: "sticker", cost: 785, emoji: "☄️" },
+        { id: "h2-planeet-blauw", name: "Planeet Blauw", type: "decor", cost: 845, art: "planeet", opts: { c: "#42a5f5", c2: "#bbdefb", ring: "#ffca28" } },
+        { id: "h2-ruimtevriendje", name: "Ruimtevriendje", type: "held", cost: 905, emoji: "👽" },
+        { id: "h2-ufo-roze", name: "Ufo Roze", type: "voertuig", cost: 965, art: "ufo", opts: { c: "#f48fb1", c2: "#f8bbd0", alien: "#4dd0e1", light: "#fff59d" } },
+        { id: "h2-melkweg", name: "Melkweg", type: "decor", cost: 1025, emoji: "🌌" },
+        { id: "h2-planeet-rood", name: "Planeet Rood", type: "decor", cost: 1085, art: "planeet", opts: { c: "#ef5350", c2: "#ffcdd2", ring: "#4dd0e1" } },
       ],
     },
     {
