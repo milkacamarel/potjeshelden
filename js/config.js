@@ -23,31 +23,6 @@ window.APP_CONFIG = {
   // type: voertuig | held | accessoire | sticker | decor
   WORLDS: [
     {
-      id: "trofee", name: "Trofeeënkast", short: "Trofee", emoji: "🏆",
-      color: "#f9a825", bg: "linear-gradient(160deg,#fffde7,#e8eaf6)",
-      // Superhelden, monsters, astronauten en ruimte: brons, zilver, goud en diamant.
-      // Staat bewust als eerste: deze wereld opent als eerste in de garage.
-      // Prijzen beginnen boven de andere werelden (die gaan tot 600).
-      items: [
-        { id: "t-held-brons", name: "Bronzen heldentrofee", type: "trofee", cost: 620, art: "heldtrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#1e88e5", f2: "#e53935" } },
-        { id: "t-monster-brons", name: "Bronzen monstertrofee", type: "trofee", cost: 645, art: "monstertrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#8bc34a", f2: "#ff7043" } },
-        { id: "t-astro-brons", name: "Bronzen astronautentrofee", type: "trofee", cost: 670, art: "astronauttrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#4fc3f7", f2: "#e53935" } },
-        { id: "t-ruimte-brons", name: "Bronzen ruimtetrofee", type: "trofee", cost: 695, art: "ruimtetrofee", opts: { c: "#d7a26c", c2: "#a0643a", f: "#7e57c2", f2: "#ff8a65" } },
-        { id: "t-held-zilver", name: "Zilveren heldentrofee", type: "trofee", cost: 720, art: "heldtrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#43a047", f2: "#ffb300" } },
-        { id: "t-monster-zilver", name: "Zilveren monstertrofee", type: "trofee", cost: 745, art: "monstertrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#4fc3f7", f2: "#ab47bc" } },
-        { id: "t-astro-zilver", name: "Zilveren astronautentrofee", type: "trofee", cost: 770, art: "astronauttrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#ffb74d", f2: "#1e88e5" } },
-        { id: "t-ruimte-zilver", name: "Zilveren ruimtetrofee", type: "trofee", cost: 795, art: "ruimtetrofee", opts: { c: "#e0e6ea", c2: "#90a4ae", f: "#42a5f5", f2: "#ffca28" } },
-        { id: "t-held-goud", name: "Gouden heldentrofee", type: "trofee", cost: 820, art: "heldtrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#7e57c2", f2: "#ec407a" } },
-        { id: "t-monster-goud", name: "Gouden monstertrofee", type: "trofee", cost: 845, art: "monstertrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#ff8a65", f2: "#7e57c2" } },
-        { id: "t-astro-goud", name: "Gouden astronautentrofee", type: "trofee", cost: 870, art: "astronauttrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#81c784", f2: "#8e24aa" } },
-        { id: "t-ruimte-goud", name: "Gouden ruimtetrofee", type: "trofee", cost: 895, art: "ruimtetrofee", opts: { c: "#ffd54f", c2: "#ff8f00", f: "#ef5350", f2: "#4dd0e1" } },
-        { id: "t-held-diamant", name: "Diamanten heldentrofee", type: "trofee", cost: 920, art: "heldtrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#e53935", f2: "#1e88e5" } },
-        { id: "t-monster-diamant", name: "Diamanten monstertrofee", type: "trofee", cost: 945, art: "monstertrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#ba68c8", f2: "#66bb6a" } },
-        { id: "t-astro-diamant", name: "Diamanten astronautentrofee", type: "trofee", cost: 970, art: "astronauttrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#f48fb1", f2: "#ff6d00" } },
-        { id: "t-ruimte-diamant", name: "Diamanten ruimtetrofee", type: "trofee", cost: 995, art: "ruimtetrofee", opts: { c: "#b2ebf2", c2: "#26a69a", f: "#26a69a", f2: "#f06292" } },
-      ],
-    },
-    {
       id: "redding", name: "Reddingswereld", short: "Redding", emoji: "🚒",
       color: "#e53935", bg: "linear-gradient(160deg,#ffebee,#e3f2fd)",
       items: [
